@@ -73,13 +73,13 @@ if st.button("HESAPLA"):
 
     st.subheader("📷 Seçilen Ürün Görseli")
     if gunes_paneli == "Evet":
-    dosya = "kompack200.jpg"
-else:
-    dosya = "safe2000.jpg"
+        dosya = "kompack200.jpg"
+    else:
+        dosya = "safe2000.jpg"
 
-try:
-    image = Image.open(f"images/{dosya}")
-    st.image(image, caption=urun, width=300)
-except:
-    st.warning("Görsel bulunamadı.")
+    try:
+        image = Image.open(f"images/{dosya}")
+        st.image(image, caption=urun, width=300)
+    except:
+        st.warning("Görsel bulunamadı.")
 
