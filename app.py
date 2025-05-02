@@ -72,10 +72,14 @@ if st.button("HESAPLA"):
     st.markdown(f"### 💰 Toplam Maliyet: **{toplam:.2f} TL**")
 
     st.subheader("📷 Seçilen Ürün Görseli")
-    if "Safe" in urun: dosya = gorseller["Safe"]
-    else: dosya = gorseller["KOMPACT"]
-    try:
-        image = Image.open("images/safe2000.jpg")
-        st.image(image, caption=urun, width=300)
-    except:
-        st.warning("Görsel bulunamadı.")
+    if gunes_paneli == "Evet":
+    dosya = "kompack200.jpg"
+else:
+    dosya = "safe2000.jpg"
+
+try:
+    image = Image.open(f"images/{dosya}")
+    st.image(image, caption=urun, width=300)
+except:
+    st.warning("Görsel bulunamadı.")
+
