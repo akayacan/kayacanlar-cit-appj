@@ -75,7 +75,7 @@ if st.button("HESAPLA"):
     if "Safe" in urun: dosya = gorseller["Safe"]
     else: dosya = gorseller["KOMPACT"]
     try:
-        image = Image.open(dosya)
+        image = Image.open("images/safe2000.jpg")
         st.image(image, caption=urun, width=300)
     except:
         st.warning("Görsel bulunamadı.")
