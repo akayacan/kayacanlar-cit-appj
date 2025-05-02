@@ -1,6 +1,9 @@
 
 import streamlit as st
+import pandas as pd
+from PIL import Image
 
+st.set_page_config(layout="wide")
 st.title("KAYACANLAR - Çit Malzeme Hesaplama Programı")
 
 # Girişler
@@ -12,21 +15,26 @@ tel = st.selectbox("Tel Tipi", ["Misinalı", "Galvaniz", "Şerit"])
 direk = st.selectbox("Direk Tipi", ["Ahşap", "İnşaat Demiri", "Köşebent", "Örgü Tel", "Plastik"])
 gunes_paneli = st.radio("Güneş Paneli Kullanılsın mı?", ["Evet", "Hayır"])
 
-# Fiyatlar
+ekipmanlar = [
+    "Sıkma Aparatı", "Topraklama Çubuğu", "Yıldırım Savar", "Tel Gerdirici",
+    "Uyarı Tabelası", "Enerji Aktarma Kablosu", "Akü Maşası", "Adaptör", "Akü Şarj Aleti"
+]
+secili_ekipmanlar = st.multiselect("Yardımcı Ekipmanlar (İsteğe Bağlı)", ekipmanlar)
+
 fiyatlar = {
-    "tel_m": 5.0,
-    "direk": 30.0,
-    "aparat": 2.5,
-    "Safe 2000": 1000,
-    "Safe 4000": 1500,
-    "Safe 6000": 2000,
-    "Safe 8000": 2500,
-    "KOMPACT 200": 2200,
-    "KOMPACT 400": 2800,
-    "KOMPACT 600": 3500
+    "Tel (m)": 5.0, "Direk": 30.0, "Aparat": 2.5,
+    "Safe 2000": 1000, "Safe 4000": 1500, "Safe 6000": 2000, "Safe 8000": 2500,
+    "KOMPACT 200": 2200, "KOMPACT 400": 2800, "KOMPACT 600": 3500,
+    "Sıkma Aparatı": 250, "Topraklama Çubuğu": 150, "Yıldırım Savar": 500,
+    "Tel Gerdirici": 200, "Uyarı Tabelası": 50, "Enerji Aktarma Kablosu": 100,
+    "Akü Maşası": 80, "Adaptör": 300, "Akü Şarj Aleti": 600,
 }
 
-# Hesapla
+gorseller = {
+    "Safe": "safe2000.jpg", "KOMPACT": "kompack200.jpg",
+    "Misinalı": "misina.jpg", "Galvaniz": "galvaniz.jpg", "Şerit": "şerit_tel.jpg"
+}
+
 if st.button("HESAPLA"):
     cevre = 2 * (en + boy)
     tel_sira = {"Ayı": 4, "Domuz": 3, "Küçükbaş": 4, "Büyükbaş": 2}[hayvan]
@@ -35,39 +43,39 @@ if st.button("HESAPLA"):
     direk_sayisi = round(cevre / direk_aralik)
     aparat = direk_sayisi * tel_sira
 
-    # Ürün seçimi
-    urun = ""
     if gunes_paneli == "Evet":
-        if toplam_tel <= 15000:
-            urun = "KOMPACT 200"
-        elif toplam_tel <= 30000:
-            urun = "KOMPACT 400"
-        elif toplam_tel <= 45000:
-            urun = "KOMPACT 600"
-        else:
-            urun = "Safe 8000"
+        if toplam_tel <= 15000: urun = "KOMPACT 200"
+        elif toplam_tel <= 30000: urun = "KOMPACT 400"
+        elif toplam_tel <= 45000: urun = "KOMPACT 600"
+        else: urun = "Safe 8000"
     else:
-        if toplam_tel <= 15000:
-            urun = "Safe 2000"
-        elif toplam_tel <= 30000:
-            urun = "Safe 4000"
-        elif toplam_tel <= 45000:
-            urun = "Safe 6000"
-        else:
-            urun = "Safe 8000"
+        if toplam_tel <= 15000: urun = "Safe 2000"
+        elif toplam_tel <= 30000: urun = "Safe 4000"
+        elif toplam_tel <= 45000: urun = "Safe 6000"
+        else: urun = "Safe 8000"
 
-    # Fiyatlandır
-    toplam_fiyat = (
-        toplam_tel * fiyatlar["tel_m"] +
-        direk_sayisi * fiyatlar["direk"] +
-        aparat * fiyatlar["aparat"] +
-        fiyatlar.get(urun, 0)
-    )
+    liste = [
+        {"Malzeme": "Tel (m)", "Adet": toplam_tel, "Birim Fiyat": fiyatlar["Tel (m)"]},
+        {"Malzeme": "Direk", "Adet": direk_sayisi, "Birim Fiyat": fiyatlar["Direk"]},
+        {"Malzeme": "Aparat", "Adet": aparat, "Birim Fiyat": fiyatlar["Aparat"]},
+        {"Malzeme": urun, "Adet": 1, "Birim Fiyat": fiyatlar[urun]}
+    ]
+    for e in secili_ekipmanlar:
+        liste.append({"Malzeme": e, "Adet": 1, "Birim Fiyat": fiyatlar[e]})
 
-    # Sonuçlar
-    st.subheader("Malzeme Listesi ve Fiyatlandırma")
-    st.write(f"Toplam Tel: {toplam_tel:.2f} m  →  {toplam_tel*fiyatlar['tel_m']:.2f} TL")
-    st.write(f"Direk Sayısı: {direk_sayisi}     →  {direk_sayisi*fiyatlar['direk']:.2f} TL")
-    st.write(f"Bağlantı Aparatı: {aparat}       →  {aparat*fiyatlar['aparat']:.2f} TL")
-    st.write(f"Ürün: {urun}                     →  {fiyatlar.get(urun, 0):.2f} TL")
-    st.markdown(f"### 💰 Toplam Maliyet: **{toplam_fiyat:.2f} TL**")
+    df = pd.DataFrame(liste)
+    df["Toplam"] = df["Adet"] * df["Birim Fiyat"]
+    toplam = df["Toplam"].sum()
+
+    st.subheader("📦 Malzeme ve Fiyat Listesi")
+    st.dataframe(df, use_container_width=True)
+    st.markdown(f"### 💰 Toplam Maliyet: **{toplam:.2f} TL**")
+
+    st.subheader("📷 Seçilen Ürün Görseli")
+    if "Safe" in urun: dosya = gorseller["Safe"]
+    else: dosya = gorseller["KOMPACT"]
+    try:
+        image = Image.open(dosya)
+        st.image(image, caption=urun, width=300)
+    except:
+        st.warning("Görsel bulunamadı.")
