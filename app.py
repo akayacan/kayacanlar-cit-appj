@@ -39,7 +39,7 @@ gorseller = {
 
 if st.button("HESAPLA"):
     cevre = 2 * (en + boy)
-    tel_sira = {"Ayı": 4, "Domuz": 3, "Küçükbaş": 4, "Büyükbaş": 2}[hayvan]
+    tel_sira = {"Ayı": 4, "Domuz": 3,"Tilki": 4, "Küçükbaş": 4, "Büyükbaş": 2}[hayvan]
     direk_aralik = {"Düz": 4, "Otluk": 3, "Eğimli": 2}[arazi]
     toplam_tel = cevre * tel_sira
     direk_sayisi = round(cevre / direk_aralik)
