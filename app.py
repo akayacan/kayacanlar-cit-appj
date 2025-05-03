@@ -92,9 +92,19 @@ def pdf_olustur(df, toplam):
     pdf.ln(10)
     pdf.cell(200, 10, txt=f"Toplam Maliyet: {toplam:.2f} TL", ln=True)
     pdf_output = pdf.output(dest='S')
-    if isinstance(pdf_output, str):
-        pdf_output = pdf_output.encode('latin1')  # Türkçe karakter uyumu
-    return pdf_output
+
+if isinstance(pdf_output, str):
+    pdf_data = pdf_output.encode('latin1')
+else:
+    pdf_data = pdf_output
+
+st.download_button(
+    label="📥 PDF Dosyasını İndir",
+    data=pdf_data,
+    file_name="cit_malzeme_listesi.pdf",
+    mime="application/pdf"
+)
+
 
 # PDF ve görsel gösterimi
 if "df" in st.session_state and "toplam" in st.session_state:
