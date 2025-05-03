@@ -14,6 +14,8 @@ arazi = st.selectbox("Arazi Tipi", ["Düz", "Otluk", "Eğimli"])
 tel = st.selectbox("Tel Tipi", ["Misinalı", "Galvaniz", "Şerit"])
 direk = st.selectbox("Direk Tipi", ["Ahşap", "İnşaat Demiri", "Köşebent", "Örgü Tel", "Plastik"])
 gunes_paneli = st.radio("Güneş Paneli Kullanılsın mı?", ["Evet", "Hayır"])
+gece_modu = st.radio("Gece Modu Eklensin mi?", ("Hayır", "Evet"))
+
 
 ekipmanlar = [
     "Sıkma Aparatı", "Topraklama Çubuğu", "Yıldırım Savar", "Tel Gerdirici",
@@ -59,6 +61,9 @@ if st.button("HESAPLA"):
         {"Malzeme": "Direk", "Adet": direk_sayisi, "Birim Fiyat": fiyatlar["Direk"]},
         {"Malzeme": "Aparat", "Adet": aparat, "Birim Fiyat": fiyatlar["Aparat"]},
         {"Malzeme": urun, "Adet": 1, "Birim Fiyat": fiyatlar[urun]}
+        if gece_modu == "Evet":
+            liste.append({"Malzeme": "Gece Modülü", "Adet": 1, "Birim Fiyat": 1500})
+
     ]
     for e in secili_ekipmanlar:
         liste.append({"Malzeme": e, "Adet": 1, "Birim Fiyat": fiyatlar[e]})
