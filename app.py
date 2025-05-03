@@ -57,16 +57,19 @@ if st.button("HESAPLA"):
         else: urun = "Safe 8000"
 
     liste = [
-        {"Malzeme": "Tel (m)", "Adet": toplam_tel, "Birim Fiyat": fiyatlar["Tel (m)"]},
-        {"Malzeme": "Direk", "Adet": direk_sayisi, "Birim Fiyat": fiyatlar["Direk"]},
-        {"Malzeme": "Aparat", "Adet": aparat, "Birim Fiyat": fiyatlar["Aparat"]},
-        {"Malzeme": urun, "Adet": 1, "Birim Fiyat": fiyatlar[urun]}
-        if gece_modu == "Evet":
-            liste.append({"Malzeme": "Gece Modülü", "Adet": 1, "Birim Fiyat": 1500})
-
+    {"Malzeme": "Tel (m)", "Adet": toplam_tel, "Birim Fiyat": fiyatlar["Tel (m)"]},
+    {"Malzeme": "Direk", "Adet": direk_sayisi, "Birim Fiyat": fiyatlar["Direk"]},
+    {"Malzeme": "Aparat", "Adet": aparat, "Birim Fiyat": fiyatlar["Aparat"]},
+    {"Malzeme": urun, "Adet": 1, "Birim Fiyat": fiyatlar[urun]}
     ]
+
+# gece modu kontrolü artık listenin DIŞINDA
+    if gece_modu == "Evet":
+    liste.append({"Malzeme": "Gece Modülü", "Adet": 1, "Birim Fiyat": 1500})
+
     for e in secili_ekipmanlar:
-        liste.append({"Malzeme": e, "Adet": 1, "Birim Fiyat": fiyatlar[e]})
+    liste.append({"Malzeme": e, "Adet": 1, "Birim Fiyat": fiyatlar[e]})
+
 
     df = pd.DataFrame(liste)
     df["Toplam"] = df["Adet"] * df["Birim Fiyat"]
