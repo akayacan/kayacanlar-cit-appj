@@ -82,8 +82,8 @@ if st.button("HESAPLA"):
 def pdf_olustur(df, toplam):
     pdf = FPDF()
     pdf.add_page()
-    pdf.add_font("Roboto", "", os.path.join("fonts", "Roboto-Regular.ttf"), uni=True)
-    pdf.set_font("Roboto", size=12)
+    pdf.add_font("Roboto", "", "fonts/Roboto-Regular.ttf", uni=True)
+    pdf.set_font("Roboto", "", 12)
     pdf.cell(200, 10, txt="KAYACANLAR - Çit Malzeme ve Fiyat Listesi", ln=True, align='C')
     pdf.ln(10)
     for index, row in df.iterrows():
