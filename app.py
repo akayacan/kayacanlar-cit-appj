@@ -107,7 +107,7 @@ if "df" in st.session_state and "toplam" in st.session_state:
     st.markdown(f"### 💰 Toplam Maliyet: **{toplam:.2f} TL**")
 
     if st.button("📄 PDF Çıktısı Al"):
-        pdf_data = pdf_olustur(df, toplam)
+    pdf_data = pdf_olustur(df, toplam)
     st.download_button(
         label="📥 PDF Dosyasını İndir",
         data=pdf_data,
