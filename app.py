@@ -91,7 +91,10 @@ def pdf_olustur(df, toplam):
         pdf.cell(200, 10, txt=line, ln=True)
     pdf.ln(10)
     pdf.cell(200, 10, txt=f"Toplam Maliyet: {toplam:.2f} TL", ln=True)
-    return pdf.output(dest="S").encode("latin1")
+    pdf_output = pdf.output(dest='S')
+    if isinstance(pdf_output, str):
+        return pdf_output.encode('latin1')
+    return pdf_output
 
 # PDF ve görsel gösterimi
 if "df" in st.session_state and "toplam" in st.session_state:
