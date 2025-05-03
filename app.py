@@ -77,9 +77,30 @@ if st.button("HESAPLA"):
     df["Toplam"] = df["Adet"] * df["Birim Fiyat"]
     toplam = df["Toplam"].sum()
 
-    if st.button("📄 PDF Çıktısı Al"):
-        html = pdf_olustur(df, toplam)
-        st.markdown(html, unsafe_allow_html=True)
+    def pdf_olustur(df, toplam):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt="Malzeme ve Fiyat Listesi", ln=True, align='C')
+
+    for index, row in df.iterrows():
+        satir = f"{row['Malzeme']}: {row['Adet']} adet x {row['Birim Fiyat']} TL = {row['Toplam']} TL"
+        pdf.cell(200, 10, txt=satir, ln=True)
+
+    pdf.cell(200, 10, txt=f"Toplam Maliyet: {toplam:.2f} TL", ln=True)
+
+    # Belleğe yaz ve döndür
+    return pdf.output(dest='S').encode('latin1')
+
+# Buton ve indirme kısmı
+if st.button("📄 PDF Çıktısı Al"):
+    pdf_data = pdf_olustur(df, toplam)
+    st.download_button(
+        label="📥 PDF Dosyasını İndir",
+        data=pdf_data,
+        file_name="malzeme_listesi.pdf",
+        mime="application/pdf"
+    )
 
 
     st.subheader("📦 Malzeme ve Fiyat Listesi")
