@@ -2,6 +2,8 @@
 import streamlit as st
 import pandas as pd
 from PIL import Image
+from fpdf import FPDF
+import base64
 
 st.set_page_config(layout="wide")
 st.title("KAYACANLAR - Çit Malzeme Hesaplama Programı")
@@ -75,6 +77,11 @@ if st.button("HESAPLA"):
     df["Toplam"] = df["Adet"] * df["Birim Fiyat"]
     toplam = df["Toplam"].sum()
 
+    if st.button("📄 PDF Çıktısı Al"):
+    html = pdf_olustur(df, toplam)
+    st.markdown(html, unsafe_allow_html=True)
+
+
     st.subheader("📦 Malzeme ve Fiyat Listesi")
     st.dataframe(df, use_container_width=True)
     st.markdown(f"### 💰 Toplam Maliyet: **{toplam:.2f} TL**")
@@ -90,4 +97,29 @@ if st.button("HESAPLA"):
         st.image(image, caption=urun, width=300)
     except:
         st.warning("Görsel bulunamadı.")
+    
+
+def pdf_olustur(df, toplam):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    
+    pdf.cell(200, 10, txt="KAYACANLAR - Çit Malzeme ve Fiyat Listesi", ln=True, align='C')
+    pdf.ln(10)
+    
+    for index, row in df.iterrows():
+        line = f"{row['Malzeme']} - Adet: {row['Adet']} - Fiyat: {row['Birim Fiyat']} - Toplam: {row['Toplam']}"
+        pdf.cell(200, 10, txt=line, ln=True)
+
+    pdf.ln(10)
+    pdf.cell(200, 10, txt=f"Toplam Maliyet: {toplam:.2f} TL", ln=True)
+
+    pdf.output("rapor.pdf")
+
+    # PDF'yi indirilebilir yapmak için base64 ile encode et
+    with open("rapor.pdf", "rb") as f:
+        pdf_bytes = f.read()
+        b64 = base64.b64encode(pdf_bytes).decode()
+        href = f'<a href="data:application/octet-stream;base64,{b64}" download="cit_malzeme_listesi.pdf">📥 PDF Olarak İndir</a>'
+        return href
 
