@@ -63,12 +63,12 @@ if st.button("HESAPLA"):
     {"Malzeme": urun, "Adet": 1, "Birim Fiyat": fiyatlar[urun]}
     ]
 
-# gece modu kontrolü artık listenin DIŞINDA
+    # gece modu kontrolü artık listenin DIŞINDA
     if gece_modu == "Evet":
-    liste.append({"Malzeme": "Gece Modülü", "Adet": 1, "Birim Fiyat": 1500})
+        liste.append({"Malzeme": "Gece Modülü", "Adet": 1, "Birim Fiyat": 1500})
 
     for e in secili_ekipmanlar:
-    liste.append({"Malzeme": e, "Adet": 1, "Birim Fiyat": fiyatlar[e]})
+        liste.append({"Malzeme": e, "Adet": 1, "Birim Fiyat": fiyatlar[e]})
 
 
     df = pd.DataFrame(liste)
