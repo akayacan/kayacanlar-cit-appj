@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 from PIL import Image
 from fpdf import FPDF
-import base64
 import os
 
 st.set_page_config(layout="wide")
@@ -16,7 +15,7 @@ arazi = st.selectbox("Arazi Tipi", ["Düz", "Otluk", "Eğimli"])
 tel = st.selectbox("Tel Tipi", ["Misinalı", "Galvaniz", "Şerit"])
 direk = st.selectbox("Direk Tipi", ["Ahşap", "İnşaat Demiri", "Köşebent", "Örgü Tel", "Plastik"])
 gunes_paneli = st.radio("Güneş Paneli Kullanılsın mı?", ["Evet", "Hayır"])
-gece_modu = st.radio("Gece Modu Eklensin mi?", ("Hayır", "Evet"))
+gece_modu = st.radio("Gece Modu Eklensin mi?", ["Hayır", "Evet"])
 
 ekipmanlar = [
     "Sıkma Aparatı", "Topraklama Çubuğu", "Yıldırım Savar", "Tel Gerdirici",
@@ -48,15 +47,23 @@ if st.button("HESAPLA"):
     aparat = direk_sayisi * tel_sira
 
     if gunes_paneli == "Evet":
-        if toplam_tel <= 15000: urun = "KOMPACT 200"
-        elif toplam_tel <= 30000: urun = "KOMPACT 400"
-        elif toplam_tel <= 45000: urun = "KOMPACT 600"
-        else: urun = "Safe 8000"
+        if toplam_tel <= 15000:
+            urun = "KOMPACT 200"
+        elif toplam_tel <= 30000:
+            urun = "KOMPACT 400"
+        elif toplam_tel <= 45000:
+            urun = "KOMPACT 600"
+        else:
+            urun = "Safe 8000"
     else:
-        if toplam_tel <= 15000: urun = "Safe 2000"
-        elif toplam_tel <= 30000: urun = "Safe 4000"
-        elif toplam_tel <= 45000: urun = "Safe 6000"
-        else: urun = "Safe 8000"
+        if toplam_tel <= 15000:
+            urun = "Safe 2000"
+        elif toplam_tel <= 30000:
+            urun = "Safe 4000"
+        elif toplam_tel <= 45000:
+            urun = "Safe 6000"
+        else:
+            urun = "Safe 8000"
 
     liste = [
         {"Malzeme": "Tel (m)", "Adet": toplam_tel, "Birim Fiyat": fiyatlar["Tel (m)"]},
@@ -92,21 +99,9 @@ def pdf_olustur(df, toplam):
     pdf.ln(10)
     pdf.cell(200, 10, txt=f"Toplam Maliyet: {toplam:.2f} TL", ln=True)
     pdf_output = pdf.output(dest='S')
+    return bytes(pdf_output.encode('latin1'))
 
-    if isinstance(pdf_output, str):
-        pdf_data = pdf_output.encode('latin1')
-    else:
-        pdf_data = pdf_output
-
-    st.download_button(
-        label="📥 PDF Dosyasını İndir",
-        data=pdf_data,
-        file_name="cit_malzeme_listesi.pdf",
-        mime="application/pdf"
-    )
-
-
-# PDF ve görsel gösterimi
+# PDF ve görsel çıktısı
 if "df" in st.session_state and "toplam" in st.session_state:
     df = st.session_state["df"]
     toplam = st.session_state["toplam"]
@@ -116,7 +111,14 @@ if "df" in st.session_state and "toplam" in st.session_state:
     st.dataframe(df, use_container_width=True)
     st.markdown(f"### 💰 Toplam Maliyet: **{toplam:.2f} TL**")
 
-    
+    if st.button("📄 PDF Çıktısı Al"):
+        pdf_data = pdf_olustur(df, toplam)
+        st.download_button(
+            label="📥 PDF Dosyasını İndir",
+            data=pdf_data,
+            file_name="cit_malzeme_listesi.pdf",
+            mime="application/pdf"
+        )
 
     st.subheader("📷 Seçilen Ürün Görseli")
     if gunes_paneli == "Evet":
