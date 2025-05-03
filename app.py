@@ -105,7 +105,10 @@ if st.button("HESAPLA"):
 def pdf_olustur(df, toplam):
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=12)
+
+    # Roboto fontunu yükle (GitHub'da fonts/Roboto-Regular.ttf olarak bulunduğu varsayılıyor)
+    pdf.add_font('Roboto', '', 'fonts/Roboto-Regular.ttf', uni=True)
+    pdf.set_font('Roboto', '', 12)
 
     pdf.cell(200, 10, txt="KAYACANLAR - Çit Malzeme ve Fiyat Listesi", ln=True, align='C')
     pdf.ln(10)
