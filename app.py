@@ -90,7 +90,7 @@ if st.button("HESAPLA"):
     pdf.cell(200, 10, txt=f"Toplam Maliyet: {toplam:.2f} TL", ln=True)
 
     # Belleğe yaz ve döndür
-    return pdf.output(dest='S').encode('latin1')
+return pdf.output(dest='S').encode('latin1')
 
 # Buton ve indirme kısmı
 if st.button("📄 PDF Çıktısı Al"):
