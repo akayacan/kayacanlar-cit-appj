@@ -9,7 +9,7 @@ st.title("KAYACANLAR - Çit Malzeme Hesaplama Programı")
 # Girişler
 en = st.number_input("Tarla En (m)", min_value=1.0, step=1.0)
 boy = st.number_input("Tarla Boy (m)", min_value=1.0, step=1.0)
-hayvan = st.selectbox("Hayvan Türü", ["Ayı", "Domuz", "Küçükbaş", "Büyükbaş"])
+hayvan = st.selectbox("Hayvan Türü", ["Ayı", "Domuz", "Tilki", "Küçükbaş", "Büyükbaş"])
 arazi = st.selectbox("Arazi Tipi", ["Düz", "Otluk", "Eğimli"])
 tel = st.selectbox("Tel Tipi", ["Misinalı", "Galvaniz", "Şerit"])
 direk = st.selectbox("Direk Tipi", ["Ahşap", "İnşaat Demiri", "Köşebent", "Örgü Tel", "Plastik"])
