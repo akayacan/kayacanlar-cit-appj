@@ -83,7 +83,7 @@ def pdf_olustur(df, toplam):
         pdf.set_font("Arial", size=12)
         pdf.cell(200, 10, txt="Malzeme ve Fiyat Listesi", ln=True, align='C')
 
-    for index, row in df.iterrows():
+        for index, row in df.iterrows():
         satir = f"{row['Malzeme']}: {row['Adet']} adet x {row['Birim Fiyat']} TL = {row['Toplam']} TL"
         pdf.cell(200, 10, txt=satir, ln=True)
 
