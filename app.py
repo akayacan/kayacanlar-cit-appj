@@ -93,13 +93,22 @@ def pdf_olustur(df, toplam):
     pdf.set_font("Roboto", "", 12)
     pdf.cell(200, 10, txt="KAYACANLAR - Çit Malzeme ve Fiyat Listesi", ln=True, align='C')
     pdf.ln(10)
+
     for index, row in df.iterrows():
         line = f"{row['Malzeme']} - Adet: {row['Adet']} - Fiyat: {row['Birim Fiyat']} - Toplam: {row['Toplam']}"
         pdf.cell(200, 10, txt=line, ln=True)
+
     pdf.ln(10)
     pdf.cell(200, 10, txt=f"Toplam Maliyet: {toplam:.2f} TL", ln=True)
+
+    # Belleğe yaz ve byte olarak dön
     pdf_output = pdf.output(dest='S')
-    return bytes(pdf_output.encode('latin1'))
+
+    # Eğer string ise encode et, değilse doğrudan döndür
+    if isinstance(pdf_output, str):
+        return pdf_output.encode('latin1')
+    return pdf_output
+
 
 # PDF ve görsel çıktısı
 if "df" in st.session_state and "toplam" in st.session_state:
