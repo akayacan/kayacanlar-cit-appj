@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 from PIL import Image
 from fpdf import FPDF
+import base64
+import os
 
 st.set_page_config(layout="wide")
 st.title("KAYACANLAR - Çit Malzeme Hesaplama Programı")
@@ -9,7 +11,7 @@ st.title("KAYACANLAR - Çit Malzeme Hesaplama Programı")
 # Girişler
 en = st.number_input("Tarla En (m)", min_value=1.0, step=1.0)
 boy = st.number_input("Tarla Boy (m)", min_value=1.0, step=1.0)
-hayvan = st.selectbox("Hayvan Türü", ["Ayı", "Domuz", "Tilki", "At", "Küçükbaş", "Büyükbaş"])
+hayvan = st.selectbox("Hayvan Türü", ["Ayı", "Domuz", "Tilki", "Küçükbaş", "Büyükbaş"])
 arazi = st.selectbox("Arazi Tipi", ["Düz", "Otluk", "Eğimli"])
 tel = st.selectbox("Tel Tipi", ["Misinalı", "Galvaniz", "Şerit"])
 direk = st.selectbox("Direk Tipi", ["Ahşap", "İnşaat Demiri", "Köşebent", "Örgü Tel", "Plastik"])
@@ -29,6 +31,7 @@ fiyatlar = {
     "Sıkma Aparatı": 250, "Topraklama Çubuğu": 150, "Yıldırım Savar": 500,
     "Tel Gerdirici": 200, "Uyarı Tabelası": 50, "Enerji Aktarma Kablosu": 100,
     "Akü Maşası": 80, "Adaptör": 300, "Akü Şarj Aleti": 600,
+    "Gece Modülü": 1500
 }
 
 gorseller = {
@@ -36,15 +39,9 @@ gorseller = {
     "Misinalı": "misina.jpg", "Galvaniz": "galvaniz.jpg", "Şerit": "şerit_tel.jpg"
 }
 
-df = pd.DataFrame()
-toplam = 0
-urun = ""
-hesaplandi = False
-
 if st.button("HESAPLA"):
-    hesaplandi = True
     cevre = 2 * (en + boy)
-    tel_sira = {"Ayı": 4, "Domuz": 3, "Tilki": 4, "At": 4, "Küçükbaş": 4, "Büyükbaş": 2}[hayvan]
+    tel_sira = {"Ayı": 4, "Domuz": 3, "Tilki": 4, "Küçükbaş": 4, "Büyükbaş": 2}[hayvan]
     direk_aralik = {"Düz": 4, "Otluk": 3, "Eğimli": 2}[arazi]
     toplam_tel = cevre * tel_sira
     direk_sayisi = round(cevre / direk_aralik)
@@ -69,7 +66,7 @@ if st.button("HESAPLA"):
     ]
 
     if gece_modu == "Evet":
-        liste.append({"Malzeme": "Gece Modülü", "Adet": 1, "Birim Fiyat": 1500})
+        liste.append({"Malzeme": "Gece Modülü", "Adet": 1, "Birim Fiyat": fiyatlar["Gece Modülü"]})
 
     for e in secili_ekipmanlar:
         liste.append({"Malzeme": e, "Adet": 1, "Birim Fiyat": fiyatlar[e]})
@@ -78,46 +75,50 @@ if st.button("HESAPLA"):
     df["Toplam"] = df["Adet"] * df["Birim Fiyat"]
     toplam = df["Toplam"].sum()
 
-    # Sonuçlar gösteriliyor
+    st.session_state["df"] = df
+    st.session_state["toplam"] = toplam
+    st.session_state["urun"] = urun
+
+def pdf_olustur(df, toplam):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.add_font("Roboto", "", os.path.join("fonts", "Roboto-Regular.ttf"), uni=True)
+    pdf.set_font("Roboto", size=12)
+    pdf.cell(200, 10, txt="KAYACANLAR - Çit Malzeme ve Fiyat Listesi", ln=True, align='C')
+    pdf.ln(10)
+    for index, row in df.iterrows():
+        line = f"{row['Malzeme']} - Adet: {row['Adet']} - Fiyat: {row['Birim Fiyat']} - Toplam: {row['Toplam']}"
+        pdf.cell(200, 10, txt=line, ln=True)
+    pdf.ln(10)
+    pdf.cell(200, 10, txt=f"Toplam Maliyet: {toplam:.2f} TL", ln=True)
+    return pdf.output(dest="S").encode("latin1")
+
+# PDF ve görsel gösterimi
+if "df" in st.session_state and "toplam" in st.session_state:
+    df = st.session_state["df"]
+    toplam = st.session_state["toplam"]
+    urun = st.session_state["urun"]
+
     st.subheader("📦 Malzeme ve Fiyat Listesi")
     st.dataframe(df, use_container_width=True)
     st.markdown(f"### 💰 Toplam Maliyet: **{toplam:.2f} TL**")
 
+    if st.button("📄 PDF Çıktısı Al"):
+        pdf_data = pdf_olustur(df, toplam)
+        st.download_button(
+            label="📅 PDF Dosyasını İndir",
+            data=pdf_data,
+            file_name="malzeme_listesi.pdf",
+            mime="application/pdf"
+        )
+
     st.subheader("📷 Seçilen Ürün Görseli")
-    dosya = "kompack200.jpg" if gunes_paneli == "Evet" else "safe2000.jpg"
+    if gunes_paneli == "Evet":
+        dosya = "kompack200.jpg"
+    else:
+        dosya = "safe2000.jpg"
     try:
         image = Image.open(f"images/{dosya}")
         st.image(image, caption=urun, width=300)
     except:
         st.warning("Görsel bulunamadı.")
-
-    # PDF çıktısı
-    if st.button("📄 PDF Çıktısı Al"):
-        pdf_data = pdf_olustur(df, toplam)
-        st.download_button(
-            label="📥 PDF Dosyasını İndir",
-            data=pdf_data,
-            file_name="cit_malzeme_listesi.pdf",
-            mime="application/pdf"
-        )
-
-# PDF üretici fonksiyon
-def pdf_olustur(df, toplam):
-    pdf = FPDF()
-    pdf.add_page()
-
-    # Roboto fontunu yükle (GitHub'da fonts/Roboto-Regular.ttf olarak bulunduğu varsayılıyor)
-    pdf.add_font('Roboto', '', 'fonts/Roboto-Regular.ttf', uni=True)
-    pdf.set_font('Roboto', '', 12)
-
-    pdf.cell(200, 10, txt="KAYACANLAR - Çit Malzeme ve Fiyat Listesi", ln=True, align='C')
-    pdf.ln(10)
-
-    for index, row in df.iterrows():
-        line = f"{row['Malzeme']} - Adet: {row['Adet']} - Fiyat: {row['Birim Fiyat']} - Toplam: {row['Toplam']}"
-        pdf.cell(200, 10, txt=line, ln=True)
-
-    pdf.ln(10)
-    pdf.cell(200, 10, txt=f"Toplam Maliyet: {toplam:.2f} TL", ln=True)
-
-    return pdf.output(dest='S').encode('latin1')
