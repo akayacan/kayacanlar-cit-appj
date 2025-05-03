@@ -1,9 +1,7 @@
-
 import streamlit as st
 import pandas as pd
 from PIL import Image
 from fpdf import FPDF
-import base64
 
 st.set_page_config(layout="wide")
 st.title("KAYACANLAR - Çit Malzeme Hesaplama Programı")
@@ -17,7 +15,6 @@ tel = st.selectbox("Tel Tipi", ["Misinalı", "Galvaniz", "Şerit"])
 direk = st.selectbox("Direk Tipi", ["Ahşap", "İnşaat Demiri", "Köşebent", "Örgü Tel", "Plastik"])
 gunes_paneli = st.radio("Güneş Paneli Kullanılsın mı?", ["Evet", "Hayır"])
 gece_modu = st.radio("Gece Modu Eklensin mi?", ("Hayır", "Evet"))
-
 
 ekipmanlar = [
     "Sıkma Aparatı", "Topraklama Çubuğu", "Yıldırım Savar", "Tel Gerdirici",
@@ -39,9 +36,15 @@ gorseller = {
     "Misinalı": "misina.jpg", "Galvaniz": "galvaniz.jpg", "Şerit": "şerit_tel.jpg"
 }
 
+df = pd.DataFrame()
+toplam = 0
+urun = ""
+hesaplandi = False
+
 if st.button("HESAPLA"):
+    hesaplandi = True
     cevre = 2 * (en + boy)
-    tel_sira = {"Ayı": 4, "Domuz": 3,"Tilki": 4, "Küçükbaş": 4, "Büyükbaş": 2}[hayvan]
+    tel_sira = {"Ayı": 4, "Domuz": 3, "Tilki": 4, "Küçükbaş": 4, "Büyükbaş": 2}[hayvan]
     direk_aralik = {"Düz": 4, "Otluk": 3, "Eğimli": 2}[arazi]
     toplam_tel = cevre * tel_sira
     direk_sayisi = round(cevre / direk_aralik)
@@ -59,75 +62,54 @@ if st.button("HESAPLA"):
         else: urun = "Safe 8000"
 
     liste = [
-    {"Malzeme": "Tel (m)", "Adet": toplam_tel, "Birim Fiyat": fiyatlar["Tel (m)"]},
-    {"Malzeme": "Direk", "Adet": direk_sayisi, "Birim Fiyat": fiyatlar["Direk"]},
-    {"Malzeme": "Aparat", "Adet": aparat, "Birim Fiyat": fiyatlar["Aparat"]},
-    {"Malzeme": urun, "Adet": 1, "Birim Fiyat": fiyatlar[urun]}
+        {"Malzeme": "Tel (m)", "Adet": toplam_tel, "Birim Fiyat": fiyatlar["Tel (m)"]},
+        {"Malzeme": "Direk", "Adet": direk_sayisi, "Birim Fiyat": fiyatlar["Direk"]},
+        {"Malzeme": "Aparat", "Adet": aparat, "Birim Fiyat": fiyatlar["Aparat"]},
+        {"Malzeme": urun, "Adet": 1, "Birim Fiyat": fiyatlar[urun]}
     ]
 
-    # gece modu kontrolü artık listenin DIŞINDA
     if gece_modu == "Evet":
         liste.append({"Malzeme": "Gece Modülü", "Adet": 1, "Birim Fiyat": 1500})
 
     for e in secili_ekipmanlar:
         liste.append({"Malzeme": e, "Adet": 1, "Birim Fiyat": fiyatlar[e]})
 
-
     df = pd.DataFrame(liste)
     df["Toplam"] = df["Adet"] * df["Birim Fiyat"]
     toplam = df["Toplam"].sum()
 
-def pdf_olustur(df, toplam):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="Malzeme ve Fiyat Listesi", ln=True, align='C')
-
-    for index, row in df.iterrows():
-        satir = f"{row['Malzeme']}: {row['Adet']} adet x {row['Birim Fiyat']} TL = {row['Toplam']} TL"
-        pdf.cell(200, 10, txt=satir, ln=True)
-
-    pdf.cell(200, 10, txt=f"Toplam Maliyet: {toplam:.2f} TL", ln=True)
-
-    # Belleğe yaz ve döndür
-    return pdf.output(dest='S').encode('latin1')
-
-# Buton ve indirme kısmı
-if st.button("📄 PDF Çıktısı Al"):
-    pdf_data = pdf_olustur(df, toplam)
-    st.download_button(
-        label="📥 PDF Dosyasını İndir",
-        data=pdf_data,
-        file_name="malzeme_listesi.pdf",
-        mime="application/pdf"
-    )
-
-
+    # Sonuçlar gösteriliyor
     st.subheader("📦 Malzeme ve Fiyat Listesi")
     st.dataframe(df, use_container_width=True)
     st.markdown(f"### 💰 Toplam Maliyet: **{toplam:.2f} TL**")
 
     st.subheader("📷 Seçilen Ürün Görseli")
-    if gunes_paneli == "Evet":
-        dosya = "kompack200.jpg"
-    else:
-        dosya = "safe2000.jpg"
-
+    dosya = "kompack200.jpg" if gunes_paneli == "Evet" else "safe2000.jpg"
     try:
         image = Image.open(f"images/{dosya}")
         st.image(image, caption=urun, width=300)
     except:
         st.warning("Görsel bulunamadı.")
-    
 
+    # PDF çıktısı
+    if st.button("📄 PDF Çıktısı Al"):
+        pdf_data = pdf_olustur(df, toplam)
+        st.download_button(
+            label="📥 PDF Dosyasını İndir",
+            data=pdf_data,
+            file_name="cit_malzeme_listesi.pdf",
+            mime="application/pdf"
+        )
+
+# PDF üretici fonksiyon
 def pdf_olustur(df, toplam):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
-    
+
     pdf.cell(200, 10, txt="KAYACANLAR - Çit Malzeme ve Fiyat Listesi", ln=True, align='C')
     pdf.ln(10)
-    
+
     for index, row in df.iterrows():
         line = f"{row['Malzeme']} - Adet: {row['Adet']} - Fiyat: {row['Birim Fiyat']} - Toplam: {row['Toplam']}"
         pdf.cell(200, 10, txt=line, ln=True)
@@ -135,12 +117,4 @@ def pdf_olustur(df, toplam):
     pdf.ln(10)
     pdf.cell(200, 10, txt=f"Toplam Maliyet: {toplam:.2f} TL", ln=True)
 
-    pdf.output("rapor.pdf")
-
-    # PDF'yi indirilebilir yapmak için base64 ile encode et
-    with open("rapor.pdf", "rb") as f:
-        pdf_bytes = f.read()
-        b64 = base64.b64encode(pdf_bytes).decode()
-        href = f'<a href="data:application/octet-stream;base64,{b64}" download="cit_malzeme_listesi.pdf">📥 PDF Olarak İndir</a>'
-        return href
-
+    return pdf.output(dest='S').encode('latin1')
