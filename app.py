@@ -116,14 +116,7 @@ if "df" in st.session_state and "toplam" in st.session_state:
     st.dataframe(df, use_container_width=True)
     st.markdown(f"### 💰 Toplam Maliyet: **{toplam:.2f} TL**")
 
-    if st.button("📄 PDF Çıktısı Al"):
-        pdf_data = pdf_olustur(df, toplam)
-        st.download_button(
-        label="📥 PDF Dosyasını İndir",
-        data=pdf_data,
-        file_name="cit_malzeme_listesi.pdf",
-        mime="application/pdf"
-    )
+    
 
     st.subheader("📷 Seçilen Ürün Görseli")
     if gunes_paneli == "Evet":
