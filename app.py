@@ -1,8 +1,7 @@
 import streamlit as st
 import pandas as pd
 from PIL import Image
-from fpdf import FPDF
-import os
+import io
 
 st.set_page_config(layout="wide")
 st.title("KAYACANLAR - Çit Malzeme Hesaplama Programı")
@@ -15,7 +14,7 @@ arazi = st.selectbox("Arazi Tipi", ["Düz", "Otluk", "Eğimli"])
 tel = st.selectbox("Tel Tipi", ["Misinalı", "Galvaniz", "Şerit"])
 direk = st.selectbox("Direk Tipi", ["Ahşap", "İnşaat Demiri", "Köşebent", "Örgü Tel", "Plastik"])
 gunes_paneli = st.radio("Güneş Paneli Kullanılsın mı?", ["Evet", "Hayır"])
-gece_modu = st.radio("Gece Modu Eklensin mi?", ["Hayır", "Evet"])
+gece_modu = st.radio("Gece Modu Eklensin mi?", ("Hayır", "Evet"))
 
 ekipmanlar = [
     "Sıkma Aparatı", "Topraklama Çubuğu", "Yıldırım Savar", "Tel Gerdirici",
@@ -38,7 +37,8 @@ gorseller = {
     "Misinalı": "misina.jpg", "Galvaniz": "galvaniz.jpg", "Şerit": "şerit_tel.jpg"
 }
 
-if st.button("HESAPLA"):
+# HESAPLAMA BUTONU
+if st.button("🔍 HESAPLA"):
     cevre = 2 * (en + boy)
     tel_sira = {"Ayı": 4, "Domuz": 3, "Tilki": 4, "Küçükbaş": 4, "Büyükbaş": 2}[hayvan]
     direk_aralik = {"Düz": 4, "Otluk": 3, "Eğimli": 2}[arazi]
@@ -47,24 +47,17 @@ if st.button("HESAPLA"):
     aparat = direk_sayisi * tel_sira
 
     if gunes_paneli == "Evet":
-        if toplam_tel <= 15000:
-            urun = "KOMPACT 200"
-        elif toplam_tel <= 30000:
-            urun = "KOMPACT 400"
-        elif toplam_tel <= 45000:
-            urun = "KOMPACT 600"
-        else:
-            urun = "Safe 8000"
+        if toplam_tel <= 15000: urun = "KOMPACT 200"
+        elif toplam_tel <= 30000: urun = "KOMPACT 400"
+        elif toplam_tel <= 45000: urun = "KOMPACT 600"
+        else: urun = "Safe 8000"
     else:
-        if toplam_tel <= 15000:
-            urun = "Safe 2000"
-        elif toplam_tel <= 30000:
-            urun = "Safe 4000"
-        elif toplam_tel <= 45000:
-            urun = "Safe 6000"
-        else:
-            urun = "Safe 8000"
+        if toplam_tel <= 15000: urun = "Safe 2000"
+        elif toplam_tel <= 30000: urun = "Safe 4000"
+        elif toplam_tel <= 45000: urun = "Safe 6000"
+        else: urun = "Safe 8000"
 
+    # Listeyi oluştur
     liste = [
         {"Malzeme": "Tel (m)", "Adet": toplam_tel, "Birim Fiyat": fiyatlar["Tel (m)"]},
         {"Malzeme": "Direk", "Adet": direk_sayisi, "Birim Fiyat": fiyatlar["Direk"]},
@@ -78,40 +71,18 @@ if st.button("HESAPLA"):
     for e in secili_ekipmanlar:
         liste.append({"Malzeme": e, "Adet": 1, "Birim Fiyat": fiyatlar[e]})
 
+    # DataFrame ve toplam
     df = pd.DataFrame(liste)
     df["Toplam"] = df["Adet"] * df["Birim Fiyat"]
     toplam = df["Toplam"].sum()
 
+    # Session state'e kaydet
     st.session_state["df"] = df
     st.session_state["toplam"] = toplam
     st.session_state["urun"] = urun
 
-def pdf_olustur(df, toplam):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.add_font("Roboto", "", "fonts/Roboto-Regular.ttf", uni=True)
-    pdf.set_font("Roboto", "", 12)
-    pdf.cell(200, 10, txt="KAYACANLAR - Çit Malzeme ve Fiyat Listesi", ln=True, align='C')
-    pdf.ln(10)
-
-    for index, row in df.iterrows():
-        line = f"{row['Malzeme']} - Adet: {row['Adet']} - Fiyat: {row['Birim Fiyat']} - Toplam: {row['Toplam']}"
-        pdf.cell(200, 10, txt=line, ln=True)
-
-    pdf.ln(10)
-    pdf.cell(200, 10, txt=f"Toplam Maliyet: {toplam:.2f} TL", ln=True)
-
-    # Belleğe yaz ve byte olarak dön
-    pdf_output = pdf.output(dest='S')
-
-    # Eğer string ise encode et, değilse doğrudan döndür
-    if isinstance(pdf_output, str):
-        return pdf_output.encode('latin1')
-    return pdf_output
-
-
-# PDF ve görsel çıktısı
-if "df" in st.session_state and "toplam" in st.session_state:
+# Excel çıktısı
+if "df" in st.session_state:
     df = st.session_state["df"]
     toplam = st.session_state["toplam"]
     urun = st.session_state["urun"]
@@ -120,15 +91,18 @@ if "df" in st.session_state and "toplam" in st.session_state:
     st.dataframe(df, use_container_width=True)
     st.markdown(f"### 💰 Toplam Maliyet: **{toplam:.2f} TL**")
 
-    if st.button("📄 PDF Çıktısı Al"):
-        pdf_data = pdf_olustur(df, toplam)
+    if st.button("📄 Excel Çıktısı Al"):
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False, sheet_name='Malzeme Listesi')
         st.download_button(
-            label="📥 PDF Dosyasını İndir",
-            data=pdf_data,
-            file_name="cit_malzeme_listesi.pdf",
-            mime="application/pdf"
+            label="📥 Excel Dosyasını İndir",
+            data=output.getvalue(),
+            file_name="cit_malzeme_listesi.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
+    # Görsel gösterimi
     st.subheader("📷 Seçilen Ürün Görseli")
     if gunes_paneli == "Evet":
         dosya = "kompack200.jpg"
