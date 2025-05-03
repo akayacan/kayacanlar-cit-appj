@@ -78,10 +78,10 @@ if st.button("HESAPLA"):
     toplam = df["Toplam"].sum()
 
     def pdf_olustur(df, toplam):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="Malzeme ve Fiyat Listesi", ln=True, align='C')
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.cell(200, 10, txt="Malzeme ve Fiyat Listesi", ln=True, align='C')
 
     for index, row in df.iterrows():
         satir = f"{row['Malzeme']}: {row['Adet']} adet x {row['Birim Fiyat']} TL = {row['Toplam']} TL"
