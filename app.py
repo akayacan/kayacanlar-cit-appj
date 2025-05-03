@@ -77,7 +77,7 @@ if st.button("HESAPLA"):
     df["Toplam"] = df["Adet"] * df["Birim Fiyat"]
     toplam = df["Toplam"].sum()
 
-    def pdf_olustur(df, toplam):
+def pdf_olustur(df, toplam):
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=12)
@@ -90,7 +90,7 @@ if st.button("HESAPLA"):
     pdf.cell(200, 10, txt=f"Toplam Maliyet: {toplam:.2f} TL", ln=True)
 
     # Belleğe yaz ve döndür
-        return pdf.output(dest='S').encode('latin1')
+    return pdf.output(dest='S').encode('latin1')
 
 # Buton ve indirme kısmı
 if st.button("📄 PDF Çıktısı Al"):
