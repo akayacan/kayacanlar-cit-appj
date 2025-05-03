@@ -78,8 +78,8 @@ if st.button("HESAPLA"):
     toplam = df["Toplam"].sum()
 
     if st.button("📄 PDF Çıktısı Al"):
-    html = pdf_olustur(df, toplam)
-    st.markdown(html, unsafe_allow_html=True)
+        html = pdf_olustur(df, toplam)
+        st.markdown(html, unsafe_allow_html=True)
 
 
     st.subheader("📦 Malzeme ve Fiyat Listesi")
