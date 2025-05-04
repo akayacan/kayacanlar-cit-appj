@@ -116,4 +116,3 @@ if st.button("HESAPLA"):
 
     excel_data = df.to_excel(index=False).encode("utf-8")
     st.download_button("📥 Excel Çıktısını İndir", data=excel_data, file_name="cit_malzeme_listesi.xlsx")
-top
