@@ -7,8 +7,8 @@ st.title("KAYACANLAR - Çit Malzeme Hesaplama Programı")
 
 # 🎯 Excel dosyasını GitHub'dan oku
 excel_url = "https://raw.githubusercontent.com/akayacan/kayacanlar-cit-appj/main/urun_listesi.xlsx"
-df_urun["Ürün Adı"] = df_urun["Ürün Adı"].str.strip()
 df_urun = pd.read_excel(excel_url)
+df_urun["Ürün Adı"] = df_urun["Ürün Adı"].str.strip()
 
 # Girişler
 en = st.number_input("Tarla En (m)", min_value=1.0, step=1.0)
