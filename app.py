@@ -18,6 +18,8 @@ kodlar = dict(zip(df_urun["Ürün Adı"], df_urun["Kod"]))
 # Giriş değerleri
 en = st.number_input("Tarla En (m)", min_value=1.0, step=1.0)
 boy = st.number_input("Tarla Boy (m)", min_value=1.0, step=1.0)
+hayvan = st.selectbox("Hayvan Türü", ["Ayı", "Domuz", "Tilki", "At", "Küçükbaş", "Büyükbaş"])
+arazi = st.selectbox("Arazi Tipi", ["Düz", "Otluk", "Eğimli"])
 tel_tipi = st.selectbox("Tel Tipi", ["MISINALI", "GALVANIZ", "SERIT"])
 
 # Alt seçenek: Kalınlık seçimi
@@ -31,7 +33,9 @@ alt_tel = st.selectbox("Tel Kalınlığı", tel_kalınlıklar[tel_tipi])
 # Hesapla butonu
 if st.button("HESAPLA"):
     cevre = 2 * (en + boy)
-    tel_uzunluk = cevre * 4  # Örnek: 4 sıra tel varsayımıyla
+    tel_sira = {"Ayı": 4, "Domuz": 3, "Tilki": 4, "At": 4, "Küçükbaş": 4, "Büyükbaş": 2}[hayvan]
+    direk_aralik = {"Düz": 4, "Otluk": 3, "Eğimli": 2}[arazi]
+    tel_uzunluk = cevre * tel_sira
 
     # Makara uzunlukları
     if "ŞERIT" in alt_tel.upper():
