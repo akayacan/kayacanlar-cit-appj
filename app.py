@@ -90,25 +90,24 @@ if st.button("HESAPLA"):
     liste = [
         {"Malzeme": tel_model, "Adet": makara_adedi, "Birim Fiyat": fiyatlar.get(tel_model, 0), "Kod": kodlar.get(tel_model, "")},
         {"Malzeme": direk_model, "Adet": direk_sayisi, "Birim Fiyat": fiyatlar.get(direk_model, 0), "Kod": kodlar.get(direk_model, "")},
-        if sikma == "Evet":
-            liste.append({"Malzeme": "Sıkma Aparatı", "Adet": 1, "Birim Fiyat": fiyatlar.get("Sıkma Aparatı", 0), "Kod": kodlar.get("Sıkma Aparatı", "")})
-        if toprak == "Evet":
-            liste.append({"Malzeme": "Topraklama Çubuğu", "Adet": 1, "Birim Fiyat": fiyatlar.get("Topraklama Çubuğu", 0), "Kod": kodlar.get("Topraklama Çubuğu", "")})
-        if yildirim == "Evet":
-            liste.append({"Malzeme": "Yıldırım Savar", "Adet": 1, "Birim Fiyat": fiyatlar.get("Yıldırım Savar", 0), "Kod": kodlar.get("Yıldırım Savar", "")})
-        if gerdirici == "Evet":
-            liste.append({"Malzeme": "Tel Gerdirici", "Adet": 1, "Birim Fiyat": fiyatlar.get("Tel Gerdirici", 0), "Kod": kodlar.get("Tel Gerdirici", "")})
-        if uyari == "Evet":
-            liste.append({"Malzeme": "Uyarı Tabelası", "Adet": 1, "Birim Fiyat": fiyatlar.get("Uyarı Tabelası", 0), "Kod": kodlar.get("Uyarı Tabelası", "")})
-        if kablosu == "Evet":
-            liste.append({"Malzeme": "Enerji Aktarma Kablosu", "Adet": 1, "Birim Fiyat": fiyatlar.get("Enerji Aktarma Kablosu", 0), "Kod": kodlar.get("Enerji Aktarma Kablosu", "")})
-        if masasi == "Evet":
-            liste.append({"Malzeme": "Akü Maşası", "Adet": 1, "Birim Fiyat": fiyatlar.get("Akü Maşası", 0), "Kod": kodlar.get("Akü Maşası", "")})
-        if adaptor == "Evet":
-            liste.append({"Malzeme": "Adaptör", "Adet": 1, "Birim Fiyat": fiyatlar.get("Adaptör", 0), "Kod": kodlar.get("Adaptör", "")})
-        if sarj == "Evet":
-            liste.append({"Malzeme": "Akü Şarj Aleti", "Adet": 1, "Birim Fiyat": fiyatlar.get("Akü Şarj Aleti", 0), "Kod": kodlar.get("Akü Şarj Aleti", "")})
-
+            if sikma == "Evet":
+                liste.append({"Malzeme": "Sıkma Aparatı", "Adet": 1, "Birim Fiyat": fiyatlar.get("Sıkma Aparatı", 0), "Kod": kodlar.get("Sıkma Aparatı", "")})
+            if toprak == "Evet":
+                liste.append({"Malzeme": "Topraklama Çubuğu", "Adet": 1, "Birim Fiyat": fiyatlar.get("Topraklama Çubuğu", 0), "Kod": kodlar.get("Topraklama Çubuğu", "")})
+            if yildirim == "Evet":
+                liste.append({"Malzeme": "Yıldırım Savar", "Adet": 1, "Birim Fiyat": fiyatlar.get("Yıldırım Savar", 0), "Kod": kodlar.get("Yıldırım Savar", "")})
+            if gerdirici == "Evet":
+                liste.append({"Malzeme": "Tel Gerdirici", "Adet": 1, "Birim Fiyat": fiyatlar.get("Tel Gerdirici", 0), "Kod": kodlar.get("Tel Gerdirici", "")})
+            if uyari == "Evet":
+                liste.append({"Malzeme": "Uyarı Tabelası", "Adet": 1, "Birim Fiyat": fiyatlar.get("Uyarı Tabelası", 0), "Kod": kodlar.get("Uyarı Tabelası", "")})
+            if kablosu == "Evet":
+                liste.append({"Malzeme": "Enerji Aktarma Kablosu", "Adet": 1, "Birim Fiyat": fiyatlar.get("Enerji Aktarma Kablosu", 0), "Kod": kodlar.get("Enerji Aktarma Kablosu", "")})
+            if masasi == "Evet":
+                liste.append({"Malzeme": "Akü Maşası", "Adet": 1, "Birim Fiyat": fiyatlar.get("Akü Maşası", 0), "Kod": kodlar.get("Akü Maşası", "")})
+            if adaptor == "Evet":
+                liste.append({"Malzeme": "Adaptör", "Adet": 1, "Birim Fiyat": fiyatlar.get("Adaptör", 0), "Kod": kodlar.get("Adaptör", "")})
+            if sarj == "Evet":
+                liste.append({"Malzeme": "Akü Şarj Aleti", "Adet": 1, "Birim Fiyat": fiyatlar.get("Akü Şarj Aleti", 0), "Kod": kodlar.get("Akü Şarj Aleti", "")})
         {"Malzeme": urun, "Adet": 1, "Birim Fiyat": fiyatlar.get(urun, 0), "Kod": kodlar.get(urun, "")}
     ]
 
