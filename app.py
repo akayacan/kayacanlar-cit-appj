@@ -11,7 +11,17 @@ en = st.number_input("Tarla En (m)", min_value=1.0, step=1.0)
 boy = st.number_input("Tarla Boy (m)", min_value=1.0, step=1.0)
 hayvan = st.selectbox("Hayvan Türü", ["Ayı", "Domuz", "Tilki", "At", "Küçükbaş", "Büyükbaş"])
 arazi = st.selectbox("Arazi Tipi", ["Düz", "Otluk", "Eğimli"])
-tel = st.selectbox("Tel Tipi", ["Misinalı", "Galvaniz", "Şerit"])
+# Tel tipi ana seçimi
+tel_tipi = st.selectbox("Tel Tipi", ["Misinalı", "Galvaniz", "Şerit"])
+
+# Tel kalınlığı/çeşidi seçenekleri - seçime bağlı olarak gösterilir
+if tel_tipi == "Misinalı":
+    tel_secimi = st.selectbox("Misinalı Tel Seçimi", ["MISINALI TEL 2mm", "MISINALI TEL 3mm", "MISINALI TEL 4mm"])
+elif tel_tipi == "Galvaniz":
+    tel_secimi = st.selectbox("Galvaniz Tel Seçimi", ["GALVANIZ TEL 1mm", "GALVANIZ TEL 1.25mm"])
+elif tel_tipi == "Şerit":
+    tel_secimi = st.selectbox("Şerit Tel Seçimi", ["SERIT TEL"])
+
 direk = st.selectbox("Direk Tipi", ["Ahşap", "İnşaat Demiri", "Köşebent", "Örgü Tel", "Plastik"])
 gunes_paneli = st.radio("Güneş Paneli Kullanılsın mı?", ["Evet", "Hayır"])
 gece_modu = st.radio("Gece Modu Eklensin mi?", ("Hayır", "Evet"))
