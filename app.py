@@ -1,69 +1,55 @@
 import streamlit as st
 import pandas as pd
 from PIL import Image
-import io
 
 st.set_page_config(layout="wide")
 st.title("KAYACANLAR - Çit Malzeme Hesaplama Programı")
+
+# 🎯 Excel dosyasını GitHub'dan oku
+excel_url = "https://raw.githubusercontent.com/akayacan/kayacanlar-cit-appj/main/urun_listesi.xlsx"
+df_urun = pd.read_excel(excel_url)
 
 # Girişler
 en = st.number_input("Tarla En (m)", min_value=1.0, step=1.0)
 boy = st.number_input("Tarla Boy (m)", min_value=1.0, step=1.0)
 hayvan = st.selectbox("Hayvan Türü", ["Ayı", "Domuz", "Tilki", "At", "Küçükbaş", "Büyükbaş"])
 arazi = st.selectbox("Arazi Tipi", ["Düz", "Otluk", "Eğimli"])
-# Tel tipi ana seçimi
-tel_tipi = st.selectbox("Tel Tipi", ["Misinalı", "Galvaniz", "Şerit"])
 
-# Tel kalınlığı/çeşidi seçenekleri - seçime bağlı olarak gösterilir
+# Tel tipi ve kalınlığı
+tel_tipi = st.selectbox("Tel Tipi", ["Misinalı", "Galvaniz", "Şerit"])
 if tel_tipi == "Misinalı":
     tel_secimi = st.selectbox("Misinalı Tel Seçimi", ["MISINALI TEL 2mm", "MISINALI TEL 3mm", "MISINALI TEL 4mm"])
 elif tel_tipi == "Galvaniz":
     tel_secimi = st.selectbox("Galvaniz Tel Seçimi", ["GALVANIZ TEL 1mm", "GALVANIZ TEL 1.25mm"])
 elif tel_tipi == "Şerit":
     tel_secimi = st.selectbox("Şerit Tel Seçimi", ["SERIT TEL"])
+else:
+    tel_secimi = tel_tipi
 
-# Direk tipi ana seçimi
+# Direk tipi ve alt seçenekleri
 direk_tipi = st.selectbox("Direk Tipi", ["Ahşap", "İnşaat Demiri", "Köşebent", "Örgü Tel", "Plastik"])
-
-# Alt çeşitlendirme - sadece plastik seçildiyse
 if direk_tipi == "Plastik":
     direk_secimi = st.selectbox("Plastik Direk Seçimi", [
-        "PLASTIK DIREK 100cm SIYAH",
-        "PLASTIK DIREK 100cm BEYAZ",
-        "PLASTIK DIREK 105cm SIYAH",
-        "PLASTIK DIREK 105cm BEYAZ",
-        "PLASTIK DIREK 125cm SIYAH",
-        "PLASTIK DIREK 125cm BEYAZ"
+        "PLASTIK DIREK 100cm SIYAH", "PLASTIK DIREK 100cm BEYAZ",
+        "PLASTIK DIREK 105cm SIYAH", "PLASTIK DIREK 105cm BEYAZ",
+        "PLASTIK DIREK 125cm SIYAH", "PLASTIK DIREK 125cm BEYAZ"
     ])
 else:
-    direk_secimi = direk_tipi  # Diğer tüm tipler doğrudan seçilmiş olur
+    direk_secimi = direk_tipi
 
+# Diğer seçimler
 gunes_paneli = st.radio("Güneş Paneli Kullanılsın mı?", ["Evet", "Hayır"])
 gece_modu = st.radio("Gece Modu Eklensin mi?", ("Hayır", "Evet"))
 
+# Yardımcı ekipmanlar
 ekipmanlar = [
     "Sıkma Aparatı", "Topraklama Çubuğu", "Yıldırım Savar", "Tel Gerdirici",
     "Uyarı Tabelası", "Enerji Aktarma Kablosu", "Akü Maşası", "Adaptör", "Akü Şarj Aleti"
 ]
 secili_ekipmanlar = st.multiselect("Yardımcı Ekipmanlar (İsteğe Bağlı)", ekipmanlar)
 
-fiyatlar = {
-    "Tel (m)": 5.0, "Direk": 30.0, "Aparat": 2.5,
-    "Safe 2000": 1000, "Safe 4000": 1500, "Safe 6000": 2000, "Safe 8000": 2500,
-    "KOMPACT 200": 2200, "KOMPACT 400": 2800, "KOMPACT 600": 3500,
-    "Sıkma Aparatı": 250, "Topraklama Çubuğu": 150, "Yıldırım Savar": 500,
-    "Tel Gerdirici": 200, "Uyarı Tabelası": 50, "Enerji Aktarma Kablosu": 100,
-    "Akü Maşası": 80, "Adaptör": 300, "Akü Şarj Aleti": 600,
-    "Gece Modülü": 1500
-}
-
-gorseller = {
-    "Safe": "safe2000.jpg", "KOMPACT": "kompack200.jpg",
-    "Misinalı": "misina.jpg", "Galvaniz": "galvaniz.jpg", "Şerit": "şerit_tel.jpg"
-}
-
-# HESAPLAMA BUTONU
-if st.button("🔍 HESAPLA"):
+# Hesapla butonu
+if st.button("HESAPLA"):
     cevre = 2 * (en + boy)
     tel_sira = {"Ayı": 4, "Domuz": 3, "Tilki": 4, "At": 4, "Küçükbaş": 4, "Büyükbaş": 2}[hayvan]
     direk_aralik = {"Düz": 4, "Otluk": 3, "Eğimli": 2}[arazi]
@@ -71,70 +57,53 @@ if st.button("🔍 HESAPLA"):
     direk_sayisi = round(cevre / direk_aralik)
     aparat = direk_sayisi * tel_sira
 
-    if gunes_paneli == "Evet":
-        if toplam_tel <= 15000: urun = "KOMPACT 200"
-        elif toplam_tel <= 30000: urun = "KOMPACT 400"
-        elif toplam_tel <= 45000: urun = "KOMPACT 600"
-        else: urun = "Safe 8000"
+    # ▶ Tel uzunluğuna göre cihaz seçimi
+    if toplam_tel <= 250:
+        urun = "ECO 500"
+    elif toplam_tel <= 1000:
+        urun = "ECO 1000"
+    elif toplam_tel <= 15000:
+        urun = "Safe 2000"
+    elif toplam_tel <= 30000:
+        urun = "Safe 4000"
+    elif toplam_tel <= 45000:
+        urun = "Safe 6000"
+    elif toplam_tel <= 60000:
+        urun = "Safe 8000"
+    elif toplam_tel <= 75000:
+        urun = "Safe 10000"
     else:
-        if toplam_tel <= 15000: urun = "Safe 2000"
-        elif toplam_tel <= 30000: urun = "Safe 4000"
-        elif toplam_tel <= 45000: urun = "Safe 6000"
-        else: urun = "Safe 8000"
+        urun = "Cihaz Belirtilmedi"
 
-    # Listeyi oluştur
+    # Ürün fiyatlarını Excel’den al
+    fiyatlar = dict(zip(df_urun["Ürün Adı"], df_urun["Fiyat (TL)"]))
+    kodlar = dict(zip(df_urun["Ürün Adı"], df_urun["Kod"]))
+
+    # Liste oluştur
     liste = [
-        {"Malzeme": tel_secimi, "Adet": toplam_tel, "Birim Fiyat": fiyatlar[tel_secimi]},
-        {"Malzeme": direk_secimi, "Adet": direk_sayisi, "Birim Fiyat": fiyatlar[direk_secimi]},
-        {"Malzeme": "Aparat", "Adet": aparat, "Birim Fiyat": fiyatlar["Aparat"]},
-        {"Malzeme": urun, "Adet": 1, "Birim Fiyat": fiyatlar[urun]}
+        {"Malzeme": tel_secimi, "Adet": toplam_tel, "Birim Fiyat": fiyatlar.get(tel_secimi, 0)},
+        {"Malzeme": direk_secimi, "Adet": direk_sayisi, "Birim Fiyat": fiyatlar.get(direk_secimi, 0)},
+        {"Malzeme": "Aparat", "Adet": aparat, "Birim Fiyat": fiyatlar.get("Aparat", 0)},
+        {"Malzeme": urun, "Adet": 1, "Birim Fiyat": fiyatlar.get(urun, 0)}
     ]
 
     if gece_modu == "Evet":
-        liste.append({"Malzeme": "Gece Modülü", "Adet": 1, "Birim Fiyat": fiyatlar["Gece Modülü"]})
+        liste.append({"Malzeme": "Gece Modülü", "Adet": 1, "Birim Fiyat": fiyatlar.get("Gece Modülü", 0)})
 
     for e in secili_ekipmanlar:
-        liste.append({"Malzeme": e, "Adet": 1, "Birim Fiyat": fiyatlar[e]})
+        liste.append({"Malzeme": e, "Adet": 1, "Birim Fiyat": fiyatlar.get(e, 0)})
 
-    # DataFrame ve toplam
+    # Tabloyu oluştur
     df = pd.DataFrame(liste)
     df["Toplam"] = df["Adet"] * df["Birim Fiyat"]
     toplam = df["Toplam"].sum()
 
-    # Session state'e kaydet
-    st.session_state["df"] = df
-    st.session_state["toplam"] = toplam
-    st.session_state["urun"] = urun
-
-# Excel çıktısı
-if "df" in st.session_state:
-    df = st.session_state["df"]
-    toplam = st.session_state["toplam"]
-    urun = st.session_state["urun"]
-
+    # Çıktı göster
     st.subheader("📦 Malzeme ve Fiyat Listesi")
     st.dataframe(df, use_container_width=True)
     st.markdown(f"### 💰 Toplam Maliyet: **{toplam:.2f} TL**")
 
-    if st.button("📄 Excel Çıktısı Al"):
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            df.to_excel(writer, index=False, sheet_name='Malzeme Listesi')
-        st.download_button(
-            label="📥 Excel Dosyasını İndir",
-            data=output.getvalue(),
-            file_name="cit_malzeme_listesi.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+    # Ürün kodunu göster (isteğe bağlı)
+    if urun in kodlar:
+        st.markdown(f"🔢 **Ürün Kodu:** `{kodlar[urun]}`")
 
-    # Görsel gösterimi
-    st.subheader("📷 Seçilen Ürün Görseli")
-    if gunes_paneli == "Evet":
-        dosya = "kompack200.jpg"
-    else:
-        dosya = "safe2000.jpg"
-    try:
-        image = Image.open(f"images/{dosya}")
-        st.image(image, caption=urun, width=300)
-    except:
-        st.warning("Görsel bulunamadı.")
