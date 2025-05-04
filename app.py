@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import math
+import io
 
 st.set_page_config(layout="wide")
 st.title("KAYACANLAR - Çit Malzeme Hesaplama Programı")
@@ -114,5 +115,13 @@ if st.button("HESAPLA"):
     st.dataframe(df, use_container_width=True)
     st.markdown(f"### 💰 Toplam Maliyet: **{toplam:,.2f} TL**")
 
-    excel_data = df.to_excel(index=False).encode("utf-8")
-    st.download_button("📥 Excel Çıktısını İndir", data=excel_data, file_name="cit_malzeme_listesi.xlsx")
+    excel_io = io.BytesIO()
+    df.to_excel(excel_io, index=False)
+    excel_io.seek(0)
+    st.download_button(
+    label="📥 Excel İndir",
+    data=excel_io,
+    file_name="cit_malzeme_listesi.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
+
