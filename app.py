@@ -45,11 +45,17 @@ direk_model = st.selectbox("Direk Modeli", direk_tipleri[direk])
 gunes_paneli = st.radio("Güneş Paneli Kullanılsın mı?", ["Evet", "Hayır"])
 gece_modu = st.radio("Gece Modu Eklensin mi?", ["Hayır", "Evet"])
 
-ekipmanlar = [
-    "Sıkma Aparatı", "Topraklama Çubuğu", "Yıldırım Savar", "Tel Gerdirici",
-    "Uyarı Tabelası", "Enerji Aktarma Kablosu", "Akü Maşası", "Adaptör", "Akü Şarj Aleti"
-]
-secili_ekipmanlar = st.multiselect("Yardımcı Ekipmanlar (İsteğe Bağlı)", ekipmanlar)
+# Yardımcı ekipman radio butonları
+sikma = st.radio("Sıkma Aparatı eklensin mi?", ["Hayır", "Evet"])
+toprak = st.radio("Topraklama Çubuğu eklensin mi?", ["Hayır", "Evet"])
+yildirim = st.radio("Yıldırım Savar eklensin mi?", ["Hayır", "Evet"])
+gerdirici = st.radio("Tel Gerdirici eklensin mi?", ["Hayır", "Evet"])
+uyari = st.radio("Uyarı Tabelası eklensin mi?", ["Hayır", "Evet"])
+kablosu = st.radio("Enerji Aktarma Kablosu eklensin mi?", ["Hayır", "Evet"])
+masasi = st.radio("Akü Maşası eklensin mi?", ["Hayır", "Evet"])
+adaptor = st.radio("Adaptör eklensin mi?", ["Hayır", "Evet"])
+sarj = st.radio("Akü Şarj Aleti eklensin mi?", ["Hayır", "Evet"])
+
 
 # HESAPLA butonu
 if st.button("HESAPLA"):
@@ -84,7 +90,25 @@ if st.button("HESAPLA"):
     liste = [
         {"Malzeme": tel_model, "Adet": makara_adedi, "Birim Fiyat": fiyatlar.get(tel_model, 0), "Kod": kodlar.get(tel_model, "")},
         {"Malzeme": direk_model, "Adet": direk_sayisi, "Birim Fiyat": fiyatlar.get(direk_model, 0), "Kod": kodlar.get(direk_model, "")},
-        {"Malzeme": "Aparat", "Adet": aparat_sayisi, "Birim Fiyat": fiyatlar.get("Aparat", 0), "Kod": kodlar.get("Aparat", "")},
+        if sikma == "Evet":
+            liste.append({"Malzeme": "Sıkma Aparatı", "Adet": 1, "Birim Fiyat": fiyatlar.get("Sıkma Aparatı", 0), "Kod": kodlar.get("Sıkma Aparatı", "")})
+        if toprak == "Evet":
+            liste.append({"Malzeme": "Topraklama Çubuğu", "Adet": 1, "Birim Fiyat": fiyatlar.get("Topraklama Çubuğu", 0), "Kod": kodlar.get("Topraklama Çubuğu", "")})
+        if yildirim == "Evet":
+            liste.append({"Malzeme": "Yıldırım Savar", "Adet": 1, "Birim Fiyat": fiyatlar.get("Yıldırım Savar", 0), "Kod": kodlar.get("Yıldırım Savar", "")})
+        if gerdirici == "Evet":
+            liste.append({"Malzeme": "Tel Gerdirici", "Adet": 1, "Birim Fiyat": fiyatlar.get("Tel Gerdirici", 0), "Kod": kodlar.get("Tel Gerdirici", "")})
+        if uyari == "Evet":
+            liste.append({"Malzeme": "Uyarı Tabelası", "Adet": 1, "Birim Fiyat": fiyatlar.get("Uyarı Tabelası", 0), "Kod": kodlar.get("Uyarı Tabelası", "")})
+        if kablosu == "Evet":
+            liste.append({"Malzeme": "Enerji Aktarma Kablosu", "Adet": 1, "Birim Fiyat": fiyatlar.get("Enerji Aktarma Kablosu", 0), "Kod": kodlar.get("Enerji Aktarma Kablosu", "")})
+        if masasi == "Evet":
+            liste.append({"Malzeme": "Akü Maşası", "Adet": 1, "Birim Fiyat": fiyatlar.get("Akü Maşası", 0), "Kod": kodlar.get("Akü Maşası", "")})
+        if adaptor == "Evet":
+            liste.append({"Malzeme": "Adaptör", "Adet": 1, "Birim Fiyat": fiyatlar.get("Adaptör", 0), "Kod": kodlar.get("Adaptör", "")})
+        if sarj == "Evet":
+            liste.append({"Malzeme": "Akü Şarj Aleti", "Adet": 1, "Birim Fiyat": fiyatlar.get("Akü Şarj Aleti", 0), "Kod": kodlar.get("Akü Şarj Aleti", "")})
+
         {"Malzeme": urun, "Adet": 1, "Birim Fiyat": fiyatlar.get(urun, 0), "Kod": kodlar.get(urun, "")}
     ]
 
