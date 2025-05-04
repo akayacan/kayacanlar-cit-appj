@@ -22,7 +22,22 @@ elif tel_tipi == "Galvaniz":
 elif tel_tipi == "Şerit":
     tel_secimi = st.selectbox("Şerit Tel Seçimi", ["SERIT TEL"])
 
-direk = st.selectbox("Direk Tipi", ["Ahşap", "İnşaat Demiri", "Köşebent", "Örgü Tel", "Plastik"])
+# Direk tipi ana seçimi
+direk_tipi = st.selectbox("Direk Tipi", ["Ahşap", "İnşaat Demiri", "Köşebent", "Örgü Tel", "Plastik"])
+
+# Alt çeşitlendirme - sadece plastik seçildiyse
+if direk_tipi == "Plastik":
+    direk_secimi = st.selectbox("Plastik Direk Seçimi", [
+        "PLASTIK DIREK 100cm SIYAH",
+        "PLASTIK DIREK 100cm BEYAZ",
+        "PLASTIK DIREK 105cm SIYAH",
+        "PLASTIK DIREK 105cm BEYAZ",
+        "PLASTIK DIREK 125cm SIYAH",
+        "PLASTIK DIREK 125cm BEYAZ"
+    ])
+else:
+    direk_secimi = direk_tipi  # Diğer tüm tipler doğrudan seçilmiş olur
+
 gunes_paneli = st.radio("Güneş Paneli Kullanılsın mı?", ["Evet", "Hayır"])
 gece_modu = st.radio("Gece Modu Eklensin mi?", ("Hayır", "Evet"))
 
@@ -69,8 +84,8 @@ if st.button("🔍 HESAPLA"):
 
     # Listeyi oluştur
     liste = [
-        {"Malzeme": "Tel (m)", "Adet": toplam_tel, "Birim Fiyat": fiyatlar["Tel (m)"]},
-        {"Malzeme": "Direk", "Adet": direk_sayisi, "Birim Fiyat": fiyatlar["Direk"]},
+        {"Malzeme": tel_secimi, "Adet": toplam_tel, "Birim Fiyat": fiyatlar[tel_secimi]},
+        {"Malzeme": direk_secimi, "Adet": direk_sayisi, "Birim Fiyat": fiyatlar[direk_secimi]},
         {"Malzeme": "Aparat", "Adet": aparat, "Birim Fiyat": fiyatlar["Aparat"]},
         {"Malzeme": urun, "Adet": 1, "Birim Fiyat": fiyatlar[urun]}
     ]
