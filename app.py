@@ -7,6 +7,7 @@ st.title("KAYACANLAR - Çit Malzeme Hesaplama Programı")
 
 # 🎯 Excel dosyasını GitHub'dan oku
 excel_url = "https://raw.githubusercontent.com/akayacan/kayacanlar-cit-appj/main/urun_listesi.xlsx"
+df_urun["Ürün Adı"] = df_urun["Ürün Adı"].str.strip()
 df_urun = pd.read_excel(excel_url)
 
 # Girişler
@@ -84,7 +85,7 @@ if st.button("HESAPLA"):
         {"Malzeme": tel_secimi, "Adet": toplam_tel, "Birim Fiyat": fiyatlar.get(tel_secimi, 0)},
         {"Malzeme": direk_secimi, "Adet": direk_sayisi, "Birim Fiyat": fiyatlar.get(direk_secimi, 0)},
         {"Malzeme": "Aparat", "Adet": aparat, "Birim Fiyat": fiyatlar.get("Aparat", 0)},
-        {"Malzeme": urun, "Adet": 1, "Birim Fiyat": fiyatlar.get(urun, 0)}
+        {"Malzeme": urun, "Adet": 1, "Birim Fiyat": fiyatlar.get(urun.strip(), 0)}
     ]
 
     if gece_modu == "Evet":
