@@ -6,7 +6,7 @@ import io
 st.set_page_config(layout="wide")
 st.title("KAYACANLAR - Çit Malzeme Hesaplama Programı")
 
-# 🔹 Excel dosyasını GitHub'dan oku
+# 📥 Excel dosyasını GitHub'dan oku
 excel_url = "https://raw.githubusercontent.com/akayacan/kayacanlar-cit-appj/main/urun_listesi.xlsx"
 df_urun = pd.read_excel(excel_url)
 df_urun["Ürün Adı"] = df_urun["Ürün Adı"].str.strip()
@@ -23,30 +23,42 @@ arazi = st.selectbox("Arazi Tipi", ["", "Düz", "Otluk", "Eğimli"])
 tel_model = st.selectbox("Tel Tipi", ["", "MISINALI TEL 2mm", "MISINALI TEL 3mm", "MISINALI TEL 4mm", "GALVANIZ TEL 1mm", "GALVANIZ TEL 1.25mm", "ŞERIT TEL"])
 direk = st.selectbox("Direk Tipi", ["", "Ahşap", "İnşaat Demiri", "Köşebent", "Örgü Tel", "Plastik"])
 
-# ✅ Aparatlar - Direk Tipine Göre
+# Plastik direk modeli seçimi
+direk_model = direk  # varsayılan
+direk_label = direk
+if direk == "Plastik":
+    plastik_modeller = ["100 cm Siyah", "100 cm Beyaz", "105 cm Siyah", "105 cm Beyaz", "125 cm Siyah", "125 cm Beyaz"]
+    secilen_plastik = st.selectbox("Plastik Direk Modeli", plastik_modeller)
+    direk_model = f"PLASTIK DIREK {secilen_plastik.upper()}"
+    direk_label = "Plastik"
+
+st.radio("Güneş Paneli Kullanılsın mı?", ["Evet", "Hayır"])
+gece_modu = st.radio("Gece Modu Eklensin mi?", ["Hayır", "Evet"])
+
+# Aparatlar - Direk Tipine Göre
 st.subheader("Aparatlar")
 aparat_secimleri = []
 
-if direk == "Ahşap":
+if direk_label == "Ahşap":
     aparat_secimleri = [
-        ("Vida İzalatörü", "C1-E"),
-        ("Vida İzalatörü Renkli", "C1-A1"),
-        ("İzalatör Civata Somun", "C1-A2"),
-        ("İzalatör Uzun Vida", "C1-D")
+        ("Vida İzolatörü", "C1-E"),
+        ("Vida İzolatörü Renkli", "C1-A1"),
+        ("İzolatör Civata Somun", "C1-A2"),
+        ("İzolatör Uzun Vida", "C1-D")
     ]
-elif direk == "İnşaat Demiri":
+elif direk_label == "İnşaat Demiri":
     aparat_secimleri = [
-        ("Mil İzalatörü R=10-18", "C4"),
-        ("Mil İzalatörü R=8-14", "C4A")
+        ("Mil İzolatörü R=10-18", "C4"),
+        ("Mil İzolatörü R=8-14", "C4A")
     ]
-elif direk == "Köşebent":
+elif direk_label == "Köşebent":
     aparat_secimleri = [
-        ("İzalatör Civata Somun", "C1-A2"),
-        ("İzalatör Uzun Vida", "C1-D"),
-        ("Köşe İzalatörü", "C16")
+        ("İzolatör Civata Somun", "C1-A2"),
+        ("İzolatör Uzun Vida", "C1-D"),
+        ("Köşe İzolatörü", "C16")
     ]
-elif direk == "Örgü Tel":
-    aparat_secimleri = [("Ağ İzalatörü", "C10")]
+elif direk_label == "Örgü Tel":
+    aparat_secimleri = [("Ağ İzolatörü", "C10")]
 
 secilen_aparatlar = []
 for isim, kod in aparat_secimleri:
@@ -58,7 +70,6 @@ for isim, kod in aparat_secimleri:
             adet = st.number_input(f"{isim} Adet", min_value=1, step=1, key=f"adet_{isim}")
             secilen_aparatlar.append((isim, adet))
 
-# Hesapla butonu
 if st.button("HESAPLA"):
     if en > 0 and boy > 0 and hayvan and arazi and tel_model:
         cevre = 2 * (en + boy)
@@ -68,17 +79,15 @@ if st.button("HESAPLA"):
         direk_sayisi = round(cevre / direk_aralik)
         aparat_sayisi = direk_sayisi * tel_sira
 
-        # Makara hesabı
         makara_uzunluk = 200 if "ŞERIT" in tel_model.upper() else 500
         makara_adedi = math.ceil(toplam_tel / makara_uzunluk)
 
         liste = [
             {"Malzeme": tel_model, "Adet": makara_adedi, "Birim Fiyat": fiyatlar.get(tel_model, 0), "Kod": kodlar.get(tel_model,"")},
-            {"Malzeme": "Direk", "Adet": direk_sayisi, "Birim Fiyat": fiyatlar.get("Direk", 0), "Kod": kodlar.get("Direk", "")},
+            {"Malzeme": direk_model, "Adet": direk_sayisi, "Birim Fiyat": fiyatlar.get(direk_model, 0), "Kod": kodlar.get(direk_model, "")},
             {"Malzeme": "Aparat", "Adet": aparat_sayisi, "Birim Fiyat": fiyatlar.get("Aparat", 0), "Kod": kodlar.get("Aparat", "")}
         ]
 
-        # Enerji cihazı tespiti
         if toplam_tel <= 250:
             urun = "ECO 500"
         elif toplam_tel <= 1000:
@@ -103,14 +112,14 @@ if st.button("HESAPLA"):
         df["Toplam"] = df["Adet"] * df["Birim Fiyat"]
         toplam = df["Toplam"].sum()
 
-        st.subheader("📆 Malzeme ve Fiyat Listesi")
+        st.subheader("📦 Malzeme ve Fiyat Listesi")
         st.dataframe(df, use_container_width=True)
         st.markdown(f"### 💰 Toplam Maliyet: **{toplam:.2f} TL**")
 
         excel_data = io.BytesIO()
         df.to_excel(excel_data, index=False)
         st.download_button(
-            label="📄 Excel Çıktısını İndir",
+            label="📥 Excel Çıktısını İndir",
             data=excel_data.getvalue(),
             file_name="malzeme_listesi.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
