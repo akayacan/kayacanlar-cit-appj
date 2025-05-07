@@ -70,6 +70,22 @@ for isim, kod in aparat_secimleri:
             adet = st.number_input(f"{isim} Adet", min_value=1, step=1, key=f"adet_{isim}")
             secilen_aparatlar.append((isim, adet))
 
+# Ek Ekipmanlar
+st.subheader("Ekipmanlar")
+ekipman_listesi = [
+    "KAPI", "TOPRAKLAMA", "UYARI LEVHA", "ENERJI AKTARMA KABLO",
+    "AKÜ ŞARJ", "YILDIRIMSAVAR", "TEL GERDIRME"
+]
+ekipmanlar = []
+for ekipman in ekipman_listesi:
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        sec = st.radio(f"{ekipman} eklensin mi?", ["Hayır", "Evet"], horizontal=True, key=f"sec_{ekipman}")
+    if sec == "Evet":
+        with col2:
+            adet = st.number_input(f"{ekipman} Adet", min_value=1, step=1, key=f"adet_{ekipman}")
+            ekipmanlar.append((ekipman, adet))
+
 if st.button("HESAPLA"):
     if en > 0 and boy > 0 and hayvan and arazi and tel_model:
         cevre = 2 * (en + boy)
@@ -77,15 +93,13 @@ if st.button("HESAPLA"):
         direk_aralik = {"Düz": 4, "Otluk": 3, "Eğimli": 2}[arazi]
         toplam_tel = cevre * tel_sira
         direk_sayisi = round(cevre / direk_aralik)
-        aparat_sayisi = direk_sayisi * tel_sira
 
         makara_uzunluk = 200 if "ŞERIT" in tel_model.upper() else 500
         makara_adedi = math.ceil(toplam_tel / makara_uzunluk)
 
         liste = [
             {"Malzeme": tel_model, "Adet": makara_adedi, "Birim Fiyat": fiyatlar.get(tel_model, 0), "Kod": kodlar.get(tel_model,"")},
-            {"Malzeme": direk_model, "Adet": direk_sayisi, "Birim Fiyat": fiyatlar.get(direk_model, 0), "Kod": kodlar.get(direk_model, "")},
-            {"Malzeme": "Aparat", "Adet": aparat_sayisi, "Birim Fiyat": fiyatlar.get("Aparat", 0), "Kod": kodlar.get("Aparat", "")}
+            {"Malzeme": direk_model, "Adet": direk_sayisi, "Birim Fiyat": fiyatlar.get(direk_model, 0), "Kod": kodlar.get(direk_model, "")}
         ]
 
         if toplam_tel <= 250:
@@ -105,10 +119,11 @@ if st.button("HESAPLA"):
 
         liste.append({"Malzeme": urun, "Adet": 1, "Birim Fiyat": fiyatlar.get(urun, 0), "Kod": kodlar.get(urun, "")})
 
-        for isim, adet in secilen_aparatlar:
+        for isim, adet in secilen_aparatlar + ekipmanlar:
             liste.append({"Malzeme": isim, "Adet": adet, "Birim Fiyat": fiyatlar.get(isim, 0), "Kod": kodlar.get(isim, "")})
 
         df = pd.DataFrame(liste)
+        df.index += 1  # index 1'den başlasın
         df["Toplam"] = df["Adet"] * df["Birim Fiyat"]
         toplam = df["Toplam"].sum()
 
@@ -117,7 +132,7 @@ if st.button("HESAPLA"):
         st.markdown(f"### 💰 Toplam Maliyet: **{toplam:.2f} TL**")
 
         excel_data = io.BytesIO()
-        df.to_excel(excel_data, index=False)
+        df.to_excel(excel_data, index=True)
         st.download_button(
             label="📥 Excel Çıktısını İndir",
             data=excel_data.getvalue(),
