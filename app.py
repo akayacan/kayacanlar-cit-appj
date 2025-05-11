@@ -97,7 +97,7 @@ for ekipman in ekipmanlar:
             "Birim Fiyat": fiyatlar.get(ekipman.strip(), 0),
             "Kod": kodlar.get(ekipman.strip(), "")
         })
- if st.button("HESAPLA"):
+if st.button("HESAPLA"):
     cevre = 2 * (en + boy)
     tel_sira = {"Ayı": 4, "Domuz": 3, "Tilki": 4, "Küçükbaş": 4, "Büyükbaş": 2}[hayvan]
     direk_aralik = {"Düz": 4, "Otluk": 3, "Eğimli": 2}[arazi]
@@ -122,5 +122,5 @@ for ekipman in ekipmanlar:
         data=excel_data.getvalue(),
         file_name="cit_malzeme_listesi.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+    )        
        
