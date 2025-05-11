@@ -17,7 +17,7 @@ st.title("KAYACANLAR - Çit Malzeme Hesaplama Programı")
 
 en = st.number_input("Tarla En (m)", min_value=0, step=1)
 boy = st.number_input("Tarla Boy (m)", min_value=0, step=1)
-hayvan = st.selectbox("Hayvan Türü", ["Ayı", "Domuz", "Tilki", "Küçükbaş", "Büyükbaş"])
+hayvan = st.selectbox("Hayvan Türü", ["Ayı", "Domuz", "Tilki", "At", "Küçükbaş", "Büyükbaş"])
 arazi = st.selectbox("Arazi Tipi", ["Düz", "Otluk", "Eğimli"])
 tel_tipi = st.selectbox("Tel Tipi", ["MISINALI", "GALVANIZ", "ŞERIT"])
 
@@ -52,7 +52,7 @@ aparatlar_dict = {
 secilen_aparatlar = []
 if en > 0 and boy > 0 and tel_model:
     cevre = 2 * (en + boy)
-    tel_sira = {"Ayı": 4, "Domuz": 3, "Tilki": 4, "Küçükbaş": 4, "Büyükbaş": 2}[hayvan]
+    tel_sira = {"Ayı": 4, "Domuz": 3, "Tilki": 4, "At": 4, "Küçükbaş": 4, "Büyükbaş": 2}[hayvan]
     toplam_tel = cevre * tel_sira
     iz_sayi_otomatik = math.ceil(toplam_tel / 5)
 
