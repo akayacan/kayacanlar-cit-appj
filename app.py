@@ -97,3 +97,30 @@ for ekipman in ekipmanlar:
             "Birim Fiyat": fiyatlar.get(ekipman.strip(), 0),
             "Kod": kodlar.get(ekipman.strip(), "")
         })
+ if st.button("HESAPLA"):
+    cevre = 2 * (en + boy)
+    tel_sira = {"Ayı": 4, "Domuz": 3, "Tilki": 4, "Küçükbaş": 4, "Büyükbaş": 2}[hayvan]
+    direk_aralik = {"Düz": 4, "Otluk": 3, "Eğimli": 2}[arazi]
+    toplam_tel = cevre * tel_sira
+
+    # diğer hesaplamalar...
+
+    df = pd.DataFrame(liste)
+    df.index = range(1, len(df) + 1)
+    df["Toplam"] = df["Adet"] * df["Birim Fiyat"]
+    toplam = df["Toplam"].sum()
+
+    st.subheader("📦 Malzeme ve Fiyat Listesi")
+    st.dataframe(df, use_container_width=True)
+    st.markdown(f"### 💰 Toplam Maliyet: **{toplam:.2f} TL**")
+
+    # Excel çıktısı
+    excel_data = BytesIO()
+    df.to_excel(excel_data, index=False)
+    st.download_button(
+        label="📥 Excel Çıktısını İndir",
+        data=excel_data.getvalue(),
+        file_name="cit_malzeme_listesi.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+       
