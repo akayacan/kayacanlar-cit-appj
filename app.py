@@ -75,7 +75,7 @@ for aparat in aparatlar_dict.get(direk_tipi, []):
 
 # Yardımcı ekipmanlar
 yardimci_ekipmanlar = [
-    "KAPI", "TOPRAKLAMA ÇUBUĞU", "UYARI TABELASI",
+    "TOPRAKLAMA ÇUBUĞU", "UYARI TABELASI",
     "ENERJI AKTARMA KABLOSU", "AKU ŞARJ ALETI", "YILDIRIM SAVAR", "TEL GERDIRICI"
 ]
 st.subheader("🧰 Yardımcı Ekipmanlar")
