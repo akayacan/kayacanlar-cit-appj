@@ -69,7 +69,7 @@ for aparat in aparatlar_dict.get(direk_tipi, []):
     secim = col1.radio(aparat, ["Hayır", "Evet"], horizontal=True, key=aparat)
     if secim == "Evet":
         # toplam_tel değeri hesaplanmadığı için güvenli varsayılan koy
-        izolator_sayisi_otomatik = 0 if en == 0 or boy == 0 else math.ceil(((en + boy) * 2 * {"Ayı": 4, "Domuz": 3, "Tilki": 4, "Küçükbaş": 4, "Büyükbaş": 2}[hayvan]) / 5)
+        izolator_sayisi_otomatik = 0 if en == 0 or boy == 0 else math.ceil(((en + boy) * 2 * {"Ayı": 4, "Domuz": 3, "Tilki": 4, "At": 4, "Küçükbaş": 4, "Büyükbaş": 2}[hayvan]) / 5)
         adet = col2.number_input(f"{aparat} Adet", min_value=1, value=izolator_sayisi_otomatik, step=1, key=aparat+"_adet")
         sec_aparatlar.append({
             "Malzeme": aparat,
