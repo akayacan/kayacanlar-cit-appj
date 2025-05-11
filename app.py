@@ -1,13 +1,13 @@
 import streamlit as st
 import pandas as pd
 from PIL import Image
-import math
 from io import BytesIO
+import math
 
 # GitHub'dan Excel dosyasını oku
 excel_url = "https://raw.githubusercontent.com/akayacan/kayacanlar-cit-appj/main/urun_listesi.xlsx"
 df_urun = pd.read_excel(excel_url)
-df_urun["Ürün Adı"] = df_urun["Ürün Adı"].str.strip().replace("UYARI TABELESA", "UYARI TABELASI")
+df_urun["Ürün Adı"] = df_urun["Ürün Adı"].str.strip()
 
 fiyatlar = dict(zip(df_urun["Ürün Adı"], df_urun["Fiyat (TL)"].fillna(0)))
 kodlar = dict(zip(df_urun["Ürün Adı"], df_urun["Kod"].fillna("")))
@@ -17,7 +17,7 @@ st.title("KAYACANLAR - Çit Malzeme Hesaplama Programı")
 
 en = st.number_input("Tarla En (m)", min_value=0, step=1)
 boy = st.number_input("Tarla Boy (m)", min_value=0, step=1)
-hayvan = st.selectbox("Hayvan Türü", ["Ayı", "Domuz", "Tilki", "At", "Küçükbaş", "Büyükbaş"])
+hayvan = st.selectbox("Hayvan Türü", ["Ayı", "Domuz", "Tilki", "Küçükbaş", "Büyükbaş"])
 arazi = st.selectbox("Arazi Tipi", ["Düz", "Otluk", "Eğimli"])
 tel_tipi = st.selectbox("Tel Tipi", ["MISINALI", "GALVANIZ", "ŞERIT"])
 
@@ -34,55 +34,45 @@ direk_tipi = st.selectbox("Direk Tipi", ["Ahşap", "İnşaat Demiri", "Köşeben
 plastik_model = ""
 if direk_tipi == "Plastik":
     plastik_model = st.selectbox("Plastik Direk Modeli", [
-        "PLASTIK DIREK 100cm SIYAH",
-        "PLASTIK DIREK 100cm BEYAZ",
-        "PLASTIK DIREK 105cm SIYAH",
-        "PLASTIK DIREK 105cm BEYAZ",
-        "PLASTIK DIREK 125cm SIYAH",
-        "PLASTIK DIREK 125cm BEYAZ"
+        "PLASTIK DIREK 100cm SIYAH", "PLASTIK DIREK 100cm BEYAZ",
+        "PLASTIK DIREK 105cm SIYAH", "PLASTIK DIREK 105cm BEYAZ",
+        "PLASTIK DIREK 125cm SIYAH", "PLASTIK DIREK 125cm BEYAZ"
     ])
 
-tel_makara_uzunlugu = {
-    "ŞERIT TEL": 200
-}
-tel_makara_uzunlugu_default = 500
-
-# İzalatör aparat seçimi
+# İzolatörler
+st.subheader("🔧 İzolatörler")
 aparatlar_dict = {
-    "Ahşap": [
-        "HALKA IZALATOR VIDALI SIYAH", "HALKA IZALATOR VIDALI RENKLI",
-        "HALKA IZALATOR SOMUNLU RENKLI", "HALKA IZALATOR SOMUNLU UZUN"
-    ],
+    "Ahşap": ["HALKA IZALATOR VIDALI SIYAH", "HALKA IZALATOR VIDALI RENKLI",
+              "HALKA IZALATOR SOMUNLU RENKLI", "HALKA IZALATOR SOMUNLU UZUN"],
     "İnşaat Demiri": ["MIL IZALATORU R=10-18", "MIL IZALATORU R=8-14"],
     "Köşebent": ["HALKA IZALATOR SOMUNLU RENKLI", "HALKA IZALATOR SOMUNLU UZUN", "KOSE IZALATOR"],
-    "Örgü Tel": ["AĞ IZALATORU"]
+    "Örgü Tel": ["ÇİVİ IZALATORU", "AĞ IZALATORU"]
 }
 
-st.subheader("🔩 İzolatörler")
 secilen_aparatlar = []
-toplam_tel = 2 * (en + boy) * {"Ayı": 4, "Domuz": 3, "Tilki": 4, "At": 4, "Küçükbaş": 4, "Büyükbaş": 2}.get(hayvan, 0)
-izolator_sayisi_otomatik = math.ceil(toplam_tel / 5)
+if en > 0 and boy > 0 and tel_model:
+    cevre = 2 * (en + boy)
+    tel_sira = {"Ayı": 4, "Domuz": 3, "Tilki": 4, "Küçükbaş": 4, "Büyükbaş": 2}[hayvan]
+    toplam_tel = cevre * tel_sira
+    iz_sayi_otomatik = math.ceil(toplam_tel / 5)
 
-for aparat in aparatlar_dict.get(direk_tipi, []):
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        secim = st.radio(aparat, ["Hayır", "Evet"], horizontal=True, key=aparat)
-    with col2:
-        adet = st.number_input(f"{aparat} Adet", min_value=0, value=izolator_sayisi_otomatik if secim == "Evet" else 0, step=1, key=aparat+"_adet")
-    if secim == "Evet" and adet > 0:
-        secilen_aparatlar.append({
-            "Malzeme": aparat,
-            "Adet": adet,
-            "Birim Fiyat": fiyatlar.get(aparat.strip(), 0),
-            "Kod": kodlar.get(aparat.strip(), "")
-        })
+    for aparat in aparatlar_dict.get(direk_tipi, []):
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            secim = st.radio(aparat, ["Hayır", "Evet"], horizontal=True, key=aparat)
+        with col2:
+            adet = st.number_input(f"{aparat} Adet", min_value=0, value=iz_sayi_otomatik, step=1, key=aparat+"_adet")
+        if secim == "Evet" and adet > 0:
+            secilen_aparatlar.append({
+                "Malzeme": aparat,
+                "Adet": adet,
+                "Birim Fiyat": fiyatlar.get(aparat.strip(), 0),
+                "Kod": kodlar.get(aparat.strip(), "")
+            })
 
 # Yardımcı ekipmanlar
 st.subheader("🧰 Yardımcı Ekipmanlar")
-ekipmanlar = [
-    "KAPI", "TOPRAKLAMA ÇUBUĞU", "UYARI TABELASI", "ENERJI AKTARMA KABLOSU",
-    "AKÜ ŞARJ ALETI", "YILDIRIM SAVAR", "TEL GERDIRICI"
-]
+ekipmanlar = ["KAPI", "TOPRAKLAMA", "UYARI TABELASI", "ENERJI AKTARMA KABLOSU", "AKU ŞARJ ALETI", "YILDIRIM SAVAR", "TEL GERDIRICI"]
 secilen_ekipmanlar = []
 for ekipman in ekipmanlar:
     col1, col2 = st.columns([3, 1])
@@ -97,13 +87,42 @@ for ekipman in ekipmanlar:
             "Birim Fiyat": fiyatlar.get(ekipman.strip(), 0),
             "Kod": kodlar.get(ekipman.strip(), "")
         })
+
 if st.button("HESAPLA"):
     cevre = 2 * (en + boy)
     tel_sira = {"Ayı": 4, "Domuz": 3, "Tilki": 4, "Küçükbaş": 4, "Büyükbaş": 2}[hayvan]
     direk_aralik = {"Düz": 4, "Otluk": 3, "Eğimli": 2}[arazi]
     toplam_tel = cevre * tel_sira
+    direk_sayisi = round(cevre / direk_aralik)
 
-    # diğer hesaplamalar...
+    if toplam_tel <= 250:
+        urun = "ECO 500"
+    elif toplam_tel <= 1000:
+        urun = "ECO 1000"
+    elif toplam_tel <= 15000:
+        urun = "Safe 2000"
+    elif toplam_tel <= 30000:
+        urun = "Safe 4000"
+    elif toplam_tel <= 45000:
+        urun = "Safe 6000"
+    elif toplam_tel <= 60000:
+        urun = "Safe 8000"
+    else:
+        urun = "Safe 10000"
+
+    tel_makara_uzunlugu = {"ŞERIT TEL": 200}
+    makara_uzunlugu = tel_makara_uzunlugu.get(tel_model.strip(), 500)
+    makara_adedi = -(-toplam_tel // makara_uzunlugu)
+
+    direk_model = plastik_model if direk_tipi == "Plastik" else f"{direk_tipi.upper()} DIREK"
+
+    liste = [
+        {"Malzeme": tel_model, "Adet": makara_adedi, "Birim Fiyat": fiyatlar.get(tel_model.strip(), 0), "Kod": kodlar.get(tel_model.strip(), "")},
+        {"Malzeme": direk_model, "Adet": direk_sayisi, "Birim Fiyat": fiyatlar.get(direk_model.strip(), 0), "Kod": kodlar.get(direk_model.strip(), "")},
+        {"Malzeme": urun, "Adet": 1, "Birim Fiyat": fiyatlar.get(urun.strip(), 0), "Kod": kodlar.get(urun.strip(), "")}
+    ]
+
+    liste.extend(secilen_aparatlar + secilen_ekipmanlar)
 
     df = pd.DataFrame(liste)
     df.index = range(1, len(df) + 1)
@@ -114,13 +133,11 @@ if st.button("HESAPLA"):
     st.dataframe(df, use_container_width=True)
     st.markdown(f"### 💰 Toplam Maliyet: **{toplam:.2f} TL**")
 
-    # Excel çıktısı
     excel_data = BytesIO()
     df.to_excel(excel_data, index=False)
     st.download_button(
-        label="📥 Excel Çıktısını İndir",
+        label="📅 Excel Çıktısını İndir",
         data=excel_data.getvalue(),
         file_name="cit_malzeme_listesi.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )        
-       
+    )
