@@ -4,32 +4,34 @@ from PIL import Image
 from io import BytesIO
 import math
 
-# Excel'den ürün verilerini çek
+# Excel dosyasını GitHub'dan oku
 excel_url = "https://raw.githubusercontent.com/akayacan/kayacanlar-cit-appj/main/urun_listesi.xlsx"
 df_urun = pd.read_excel(excel_url)
-df_urun["Ürün Adı"] = df_urun["Ürün Adı"].str.strip()
-fiyatlar = dict(zip(df_urun["Ürün Adı"], df_urun["Fiyat (TL)"].fillna(0)))
-kodlar = dict(zip(df_urun["Ürün Adı"], df_urun["Kod"].fillna("")))
+df_urun["Ürün Adı"] = df_urun["\u00dcrün Adı"].str.strip()
+
+fiyatlar = dict(zip(df_urun["\u00dcrün Adı"], df_urun["Fiyat (TL)"].fillna(0)))
+kodlar = dict(zip(df_urun["\u00dcrün Adı"], df_urun["Kod"].fillna("")))
 
 st.set_page_config(layout="wide")
 st.title("KAYACANLAR - Çit Malzeme Hesaplama Programı")
 
-# Girişler
+# Kullanıcı Girişleri
 en = st.number_input("Tarla En (m)", min_value=0, step=1)
 boy = st.number_input("Tarla Boy (m)", min_value=0, step=1)
 hayvan = st.selectbox("Hayvan Türü", ["Ayı", "Domuz", "Tilki", "Küçükbaş", "Büyükbaş", "At"])
 arazi = st.selectbox("Arazi Tipi", ["Düz", "Otluk", "Eğimli"])
 tel_tipi = st.selectbox("Tel Tipi", ["MISINALI", "GALVANIZ", "ŞERIT"])
 
+# Tel model seçimi
 tel_model_options = {
     "MISINALI": ["MISINALI TEL 2mm", "MISINALI TEL 3mm", "MISINALI TEL 4mm"],
     "GALVANIZ": ["GALVANIZ TEL 1mm", "GALVANIZ TEL 1.25mm"],
-    "ŞERIT": ["SERIT TEL"]
+    "ŞERIT": ["ŞERIT TEL"]
 }
-tel_model = st.selectbox("Tel Modeli", tel_model_options[tel_tipi])
+tel_model = st.selectbox("Tel Modeli", tel_model_options.get(tel_tipi, []))
 
+# Direk tipi ve plastik modelleri
 direk_tipi = st.selectbox("Direk Tipi", ["Ahşap", "İnşaat Demiri", "Köşebent", "Örgü Tel", "Plastik"])
-
 plastik_model = ""
 if direk_tipi == "Plastik":
     plastik_model = st.selectbox("Plastik Direk Modeli", [
@@ -38,68 +40,44 @@ if direk_tipi == "Plastik":
         "PLASTIK DIREK 125cm SIYAH", "PLASTIK DIREK 125cm BEYAZ"
     ])
 
-# Tel makara uzunlukları
-tel_makara_uzunlugu = {"SERIT TEL": 200}
-default_makara = 500
-tel_sira_dict = {"Ayı": 4, "Domuz": 3, "Tilki": 4, "Küçükbaş": 4, "Büyükbaş": 2, "At": 4}
-
-toplam_tel = 2 * (en + boy) * tel_sira_dict[hayvan]
-izolator_sayisi_otomatik = 0 if toplam_tel == 0 else math.ceil(toplam_tel / 5)
-
-# İzolatör seçenekleri
-aparatlar_dict = {
-    "Ahşap": [
-        "HALKA IZALATOR VIDALI SIYAH", "HALKA IZALATOR VIDALI RENKLI",
-        "HALKA IZALATOR SOMUNLU RENKLI", "HALKA IZALATOR SOMUNLU UZUN"
-    ],
-    "İnşaat Demiri": ["MIL IZALATORU R=10-18", "MIL IZALATORU R=8-14"],
-    "Köşebent": ["HALKA IZALATOR SOMUNLU RENKLI", "HALKA IZALATOR SOMUNLU UZUN", "KOSE IZALATOR"],
-    "Örgü Tel": ["AĞ IZALATORU"]
-}
-
-st.subheader("🔩 İzolatörler")
-secilen_aparatlar = []
-for aparat in aparatlar_dict.get(direk_tipi, []):
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        secim = st.radio(aparat, ["Hayır", "Evet"], horizontal=True, key=aparat)
-    if secim == "Evet":
-        with col2:
-            adet = st.number_input(f"{aparat} Adet", min_value=1, step=1, value=izolator_sayisi_otomatik, key=aparat+"_adet")
-        secilen_aparatlar.append({
-            "Malzeme": aparat,
-            "Adet": adet,
-            "Birim Fiyat": fiyatlar.get(aparat, 0),
-            "Kod": kodlar.get(aparat, "")
-        })
+# Güneş Paneli
+st.subheader("🔋 Güneş Paneli Seçimi")
+gunes_paneli = st.radio("Güneş Paneli Kullanılsın mı?", ["Hayır", "Evet"], horizontal=True)
+gunes_model = ""
+if gunes_paneli == "Evet":
+    gunes_model = st.selectbox("Panel Modeli", ["GUNES PANELI 12W", "GUNES PANELI 25W"])
 
 # Yardımcı ekipmanlar
-yardimci_ekipmanlar = [
-    "TOPRAKLAMA ÇUBUĞU", "UYARI TABELASI",
-    "ENERJI AKTARMA KABLOSU", "AKU ŞARJ ALETI", "YILDIRIM SAVAR", "TEL GERDIRICI"
-]
 st.subheader("🧰 Yardımcı Ekipmanlar")
+ekipmanlar = ["TOPRAKLAMA ÇUBUĞU", "TEL GERDIRICI", "YILDIRIM SAVAR", "UYARI TABELASI", "ENERJI AKTARMA KABLOSU", "AKU ŞARJ ALETI"]
 secilen_ekipmanlar = []
-for ekipman in yardimci_ekipmanlar:
+for ekipman in ekipmanlar:
     col1, col2 = st.columns([3, 1])
     with col1:
         secim = st.radio(ekipman, ["Hayır", "Evet"], horizontal=True, key=ekipman)
-    if secim == "Evet":
-        with col2:
-            adet = st.number_input(f"{ekipman} Adet", min_value=1, step=1, key=ekipman+"_adet")
+    with col2:
+        adet = st.number_input(f"{ekipman} Adet", min_value=0, step=1, key=ekipman+"_adet")
+    if secim == "Evet" and adet > 0:
         secilen_ekipmanlar.append({
             "Malzeme": ekipman,
             "Adet": adet,
-            "Birim Fiyat": fiyatlar.get(ekipman, 0),
-            "Kod": kodlar.get(ekipman, "")
+            "Birim Fiyat": fiyatlar.get(ekipman.strip(), 0),
+            "Kod": kodlar.get(ekipman.strip(), "")
         })
 
-# HESAPLA butonu
+# Kapı seti
+st.subheader("🔒 Kapı Seti")
+kapiset_secim = st.radio("Kapı Seti Kullanılsın mı?", ["Hayır", "Evet"], horizontal=True)
+kapiset_adet = 0
+if kapiset_secim == "Evet":
+    kapiset_adet = st.number_input("Kapı Seti Adedi", min_value=1, step=1, key="kapiset")
+
 if st.button("HESAPLA"):
+    cevre = 2 * (en + boy)
+    tel_sira = {"Ayı": 4, "Domuz": 3, "Tilki": 4, "Küçükbaş": 4, "Büyükbaş": 2, "At": 4}[hayvan]
     direk_aralik = {"Düz": 4, "Otluk": 3, "Eğimli": 2}[arazi]
-    direk_sayisi = round((2 * (en + boy)) / direk_aralik)
-    tel_sira = tel_sira_dict[hayvan]
-    aparat = direk_sayisi * tel_sira
+    toplam_tel = cevre * tel_sira
+    direk_sayisi = round(cevre / direk_aralik)
 
     if toplam_tel <= 250:
         urun = "ECO 500"
@@ -116,33 +94,44 @@ if st.button("HESAPLA"):
     else:
         urun = "Safe 10000"
 
-    makara_uzunlugu = tel_makara_uzunlugu.get(tel_model, default_makara)
-    makara_adedi = -(-toplam_tel // makara_uzunlugu)  # yukarı yuvarla
-
+    tel_makara_uzunlugu = {"ŞERIT TEL": 200}.get(tel_model.strip(), 500)
+    makara_adedi = -(-toplam_tel // tel_makara_uzunlugu)
     direk_model = plastik_model if direk_tipi == "Plastik" else f"{direk_tipi.upper()} DIREK"
 
     liste = [
-        {"Malzeme": tel_model, "Adet": makara_adedi, "Birim Fiyat": fiyatlar.get(tel_model, 0), "Kod": kodlar.get(tel_model, "")},
-        {"Malzeme": direk_model, "Adet": direk_sayisi, "Birim Fiyat": fiyatlar.get(direk_model, 0), "Kod": kodlar.get(direk_model, "")},
-        {"Malzeme": urun, "Adet": 1, "Birim Fiyat": fiyatlar.get(urun, 0), "Kod": kodlar.get(urun, "")},
+        {"Malzeme": tel_model, "Adet": makara_adedi, "Birim Fiyat": fiyatlar.get(tel_model.strip(), 0), "Kod": kodlar.get(tel_model.strip(), "")},
+        {"Malzeme": direk_model, "Adet": direk_sayisi, "Birim Fiyat": fiyatlar.get(direk_model.strip(), 0), "Kod": kodlar.get(direk_model.strip(), "")},
+        {"Malzeme": urun, "Adet": 1, "Birim Fiyat": fiyatlar.get(urun.strip(), 0), "Kod": kodlar.get(urun.strip(), "")}
     ]
 
-    for a in secilen_aparatlar + secilen_ekipmanlar:
-        liste.append(a)
+    # Güneş paneli ekle
+    if gunes_paneli == "Evet" and gunes_model:
+        liste.append({"Malzeme": gunes_model, "Adet": 1, "Birim Fiyat": fiyatlar.get(gunes_model.strip(), 0), "Kod": kodlar.get(gunes_model.strip(), "")})
+
+    # Yardımcı ekipmanlar
+    for e in secilen_ekipmanlar:
+        liste.append(e)
+
+    # Kapı seti hesapla
+    if kapiset_secim == "Evet" and kapiset_adet > 0:
+        liste.append({"Malzeme": "C6-A", "Adet": kapiset_adet, "Birim Fiyat": 0, "Kod": "C6-A"})
+        liste.append({"Malzeme": "C6-B", "Adet": kapiset_adet * 2, "Birim Fiyat": 0, "Kod": "C6-B"})
+        liste.append({"Malzeme": "C6-C", "Adet": kapiset_adet, "Birim Fiyat": 0, "Kod": "C6-C"})
+        liste.append({"Malzeme": "KAPI SETİ", "Adet": kapiset_adet, "Birim Fiyat": 128.3, "Kod": "SET"})
 
     df = pd.DataFrame(liste)
     df.index = range(1, len(df) + 1)
     df["Toplam"] = df["Adet"] * df["Birim Fiyat"]
     toplam = df["Toplam"].sum()
 
-    st.subheader("📦 Malzeme ve Fiyat Listesi")
+    st.subheader("📆 Malzeme ve Fiyat Listesi")
     st.dataframe(df, use_container_width=True)
     st.markdown(f"### 💰 Toplam Maliyet: **{toplam:.2f} TL**")
 
     excel_data = BytesIO()
     df.to_excel(excel_data, index=False)
     st.download_button(
-        label="📥 Excel Çıktısını İndir",
+        label="📅 Excel Çıktısını İndir",
         data=excel_data.getvalue(),
         file_name="cit_malzeme_listesi.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
