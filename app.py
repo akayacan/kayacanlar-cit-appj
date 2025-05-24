@@ -22,11 +22,11 @@ hayvan = st.selectbox("Hayvan Türü", ["Ayı", "Domuz", "Tilki", "Küçükbaş"
 arazi = st.selectbox("Arazi Tipi", ["Düz", "Otluk", "Eğimli"])
 
 # Tel seçimi
-tel_tipi = st.selectbox("Tel Tipi", ["MISINALI", "GALVANIZ", "ŞERIT"])
+tel_tipi = st.selectbox("Tel Tipi", ["MISINALI", "GALVANIZ", "SERIT"])
 tel_model_options = {
     "MISINALI": ["MISINALI TEL 2mm", "MISINALI TEL 3mm", "MISINALI TEL 4mm"],
     "GALVANIZ": ["GALVANIZ TEL 1mm", "GALVANIZ TEL 1.25mm"],
-    "ŞERIT": ["ŞERIT TEL"]
+    "SERIT": ["SERIT TEL"]
 }
 tel_model = st.selectbox("Tel Modeli", tel_model_options.get(tel_tipi, []))
 
@@ -123,7 +123,7 @@ if st.button("HESAPLA"):
     toplam_tel = cevre * tel_sira
     direk_sayisi = round(cevre / direk_aralik)
 
-    tel_makara_uzunlugu = {"ŞERIT TEL": 200}
+    tel_makara_uzunlugu = {"SERIT TEL": 200}
     makara_adedi = math.ceil(toplam_tel / tel_makara_uzunlugu.get(tel_model, 500))
     direk_model = plastik_model if direk_tipi == "Plastik" else f"{direk_tipi.upper()} DIREK"
 
